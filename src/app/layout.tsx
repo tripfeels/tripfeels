@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { GeistSans } from 'geist/font/sans'
 import { Poppins } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/react'
 import { AuthSessionProvider } from '@/components/providers/session-provider'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { ThemeProvider as CustomThemeProvider } from '@/contexts/theme-context'
@@ -140,6 +141,7 @@ export default function RootLayout({
             </AuthSessionProvider>
           </CustomThemeProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )
