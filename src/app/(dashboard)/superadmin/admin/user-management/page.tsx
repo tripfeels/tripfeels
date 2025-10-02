@@ -64,10 +64,21 @@ export default function SuperAdminUserManagement() {
 
   // Refresh users data when session changes (after login)
   useEffect(() => {
-    if (session && !isLoading) {
+    if (session) {
       loadUsers()
     }
-  }, [session])
+  }, [session]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Debounced search effect
+  useEffect(() => {
+    if (!session) return
+
+    const timeoutId = setTimeout(() => {
+      // Trigger re-filter when search or role filter changes
+    }, search ? 300 : 0) // 300ms debounce for search
+
+    return () => clearTimeout(timeoutId)
+  }, [roleFilter, search, session])
 
   const filteredUsers = useMemo(() => {
     return users

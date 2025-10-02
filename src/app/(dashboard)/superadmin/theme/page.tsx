@@ -34,7 +34,6 @@ export default function SuperAdminThemePage() {
   const handleSave = () => {
     saveThemeSettings()
     // Show success message or toast
-    console.log('Theme settings saved successfully')
   }
 
   const handleColorThemeSelect = (theme: string) => {
@@ -42,8 +41,8 @@ export default function SuperAdminThemePage() {
   }
 
   const handlePreview = () => {
-    // TODO: Implement preview functionality
-    console.log('Previewing theme changes')
+    // Open theme demo page in new tab to preview changes
+    window.open('/theme-demo', '_blank')
   }
 
   return (

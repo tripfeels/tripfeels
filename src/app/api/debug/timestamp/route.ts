@@ -5,6 +5,11 @@ import { adminDb } from '@/lib/firebase/admin'
 
 export async function GET() {
   try {
+    // Only allow in development environment
+    if (process.env.NODE_ENV !== 'development') {
+      return NextResponse.json({ error: 'Debug endpoints are only available in development' }, { status: 404 })
+    }
+
     const session = await getServerSession(authOptions)
     
     if (!session || session.user.role !== 'SuperAdmin') {

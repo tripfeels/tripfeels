@@ -5,13 +5,17 @@ import { adminDb } from '@/lib/firebase/admin'
 
 export async function GET() {
   try {
+    // Only allow in development environment
+    if (process.env.NODE_ENV !== 'development') {
+      return NextResponse.json({ error: 'Test endpoints are only available in development' }, { status: 404 })
+    }
+
     const session = await getServerSession(authOptions)
     
     if (!session) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    console.log('Testing user creation...')
     
     // Test creating a user document
     const testUserId = 'test-user-' + Date.now()
@@ -40,17 +44,14 @@ export async function GET() {
       assignedBy: ''
     }
     
-    console.log('Creating test user:', testUserData)
     await adminDb.collection('users').doc(testUserId).set(testUserData)
     
     // Verify the user was created
     const createdUser = await adminDb.collection('users').doc(testUserId).get()
     
     if (createdUser.exists) {
-      console.log('Test user created successfully')
       // Clean up the test user
       await adminDb.collection('users').doc(testUserId).delete()
-      console.log('Test user cleaned up')
       
       return NextResponse.json({ 
         success: true,

@@ -50,7 +50,51 @@ export const roleAssignmentSchema = z.object({
   subRole: z.string().optional(),
 })
 
+// Traveller form validation schema
+export const travellerFormSchema = z.object({
+  ptc: z.enum(['Adult', 'Child', 'Infant']).optional(),
+  givenName: z.string().min(2, 'Given name must be at least 2 characters').max(50, 'Given name must be less than 50 characters'),
+  surname: z.string().min(2, 'Surname must be at least 2 characters').max(50, 'Surname must be less than 50 characters'),
+  gender: z.enum(['Male', 'Female', 'Other']).optional(),
+  birthdate: z.string().optional().refine((date) => {
+    if (!date) return true // Optional field
+    const birthDate = new Date(date)
+    const today = new Date()
+    return birthDate <= today
+  }, 'Birthdate cannot be in the future'),
+  nationality: z.string().optional(),
+  phoneNumber: z.string().min(10, 'Phone number must be at least 10 digits').regex(/^\d+$/, 'Phone number must contain only digits'),
+  countryDialingCode: z.string().optional(),
+  emailAddress: z.string().email('Please enter a valid email address').optional().or(z.literal('')),
+  documentType: z.enum(['Passport', 'National ID', 'Driver License', 'Other']).optional(),
+  documentId: z.string().optional(),
+  documentExpiryDate: z.string().optional().refine((date) => {
+    if (!date) return true // Optional field
+    const expiryDate = new Date(date)
+    const today = new Date()
+    return expiryDate > today
+  }, 'Document must not be expired'),
+  ssrCodes: z.array(z.object({
+    code: z.string().min(1, 'SSR code is required'),
+    remark: z.string().optional()
+  })).optional(),
+  loyaltyAirlineCode: z.string().optional(),
+  loyaltyAccountNumber: z.string().optional()
+})
+
+// User profile edit schema
+export const userProfileEditSchema = z.object({
+  firstName: z.string().min(2, 'First name must be at least 2 characters').max(50, 'First name must be less than 50 characters'),
+  lastName: z.string().min(2, 'Last name must be at least 2 characters').max(50, 'Last name must be less than 50 characters'),
+  gender: z.enum(['Male', 'Female', 'Other']),
+  dateOfBirth: z.string().min(1, 'Date of birth is required'),
+  mobile: z.string().min(10, 'Mobile number must be at least 10 digits').regex(/^\d+$/, 'Mobile number must contain only digits'),
+  avatar: z.string().url('Avatar must be a valid URL').optional().or(z.literal(''))
+})
+
 export type RegistrationFormData = z.infer<typeof registrationSchema>
 export type SignInFormData = z.infer<typeof signInSchema>
 export type ProfileUpdateData = z.infer<typeof profileUpdateSchema>
 export type RoleAssignmentData = z.infer<typeof roleAssignmentSchema>
+export type TravellerFormData = z.infer<typeof travellerFormSchema>
+export type UserProfileEditData = z.infer<typeof userProfileEditSchema>

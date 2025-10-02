@@ -46,7 +46,6 @@ export const authOptions: NextAuthOptions = {
               await adminDb.collection('users').doc(user.uid).update({
                 'metadata.lastLoginAt': updateTime
               })
-              console.log('✅ Updated last login timestamp for credentials user:', user.email, 'at', updateTime.toISOString())
             } catch (error) {
               console.error('❌ Error updating last login timestamp:', error)
             }
@@ -74,21 +73,13 @@ export const authOptions: NextAuthOptions = {
       if (!user.email) return false
 
       try {
-        console.log('Sign in attempt:', { 
-          email: user.email, 
-          provider: account?.provider,
-          userId: user.id 
-        })
-        
         // For social logins, always allow sign in and handle user creation in jwt callback
         if (account?.provider === 'google' || account?.provider === 'facebook') {
-          console.log('Social login detected:', account.provider)
           return true
         }
         
         // For credentials provider, user should already exist
         if (account?.provider === 'credentials') {
-          console.log('Credentials login detected')
           return true
         }
         
@@ -109,24 +100,18 @@ export const authOptions: NextAuthOptions = {
     // Handle social logins - create user in Firestore if needed and assign role
     if (user && account && (account.provider === 'google' || account.provider === 'facebook')) {
       try {
-        console.log('Processing social login for user:', user.id, user.email)
-        
         // Check if user exists in Firestore using Admin SDK
         const userDoc = await adminDb.collection('users').doc(user.id).get()
         
         if (userDoc.exists) {
-          console.log('User exists in Firestore, updating last login')
           const userData = userDoc.data()
           // Update last login time for existing user
           const updateTime = new Date()
           await adminDb.collection('users').doc(user.id).update({
             'metadata.lastLoginAt': updateTime
           })
-          console.log('✅ Updated last login timestamp for social login user:', user.email, 'at', updateTime.toISOString())
           token.role = userData?.role || 'User'
-          console.log('User role from Firestore:', token.role)
         } else {
-          console.log('User not found in Firestore, creating new user')
           // Create new user in Firestore using Admin SDK
           const role = isSuperAdminEmail(user.email || '') ? 'SuperAdmin' : 'User'
           const now = new Date()
@@ -154,16 +139,13 @@ export const authOptions: NextAuthOptions = {
             assignedBy: ''
           }
           
-          console.log('Creating new user in Firestore:', userData)
           await adminDb.collection('users').doc(user.id).set(userData)
           token.role = role
-          console.log('New user created with role:', role)
         }
       } catch (error) {
         console.error('Error handling social login:', error)
         // Fallback to default role
         token.role = isSuperAdminEmail(user.email || '') ? 'SuperAdmin' : 'User'
-        console.log('Fallback role assigned:', token.role)
       }
       return token
     }

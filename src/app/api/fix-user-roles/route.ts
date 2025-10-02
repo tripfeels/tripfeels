@@ -6,6 +6,11 @@ import { FieldValue } from 'firebase-admin/firestore'
 
 export async function POST() {
   try {
+    // Only allow in development environment
+    if (process.env.NODE_ENV !== 'development') {
+      return NextResponse.json({ error: 'Fix endpoints are only available in development' }, { status: 404 })
+    }
+
     const session = await getServerSession(authOptions)
     
     if (!session || session.user.role !== 'SuperAdmin') {

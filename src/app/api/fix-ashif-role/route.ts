@@ -6,6 +6,11 @@ import { FieldValue } from 'firebase-admin/firestore'
 
 export async function POST() {
   try {
+    // Only allow in development environment
+    if (process.env.NODE_ENV !== 'development') {
+      return NextResponse.json({ error: 'Fix endpoints are only available in development' }, { status: 404 })
+    }
+
     const session = await getServerSession(authOptions)
     
     if (!session || session.user.role !== 'SuperAdmin') {
@@ -24,16 +29,8 @@ export async function POST() {
     const userData = userDoc.data()
     const userId = userDoc.id
 
-    console.log('Current user data:', {
-      uid: userId,
-      email: userData.email,
-      role: userData.role,
-      profileRole: userData.profile?.role
-    })
-
     // Check if role is in profile object but not at root level
     if (userData.profile?.role && !userData.role) {
-      console.log(`Moving role from profile to root level: ${userData.profile.role}`)
       
       // Update the document to move role from profile to root level
       await adminDb.collection('users').doc(userId).update({

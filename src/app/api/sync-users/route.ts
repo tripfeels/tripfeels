@@ -6,17 +6,19 @@ import { isSuperAdminEmail } from '@/lib/firebase/firestore'
 
 export async function POST() {
   try {
+    // Only allow in development environment
+    if (process.env.NODE_ENV !== 'development') {
+      return NextResponse.json({ error: 'Sync endpoints are only available in development' }, { status: 404 })
+    }
+
     const session = await getServerSession(authOptions)
     
     if (!session || session.user.role !== 'SuperAdmin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    console.log('Starting user sync from Firebase Auth to Firestore...')
-    
     // Get all users from Firebase Auth
     const authUsers = await adminAuth.listUsers()
-    console.log(`Found ${authUsers.users.length} users in Firebase Auth`)
     
     const results = {
       total: authUsers.users.length,
@@ -43,7 +45,6 @@ export async function POST() {
           })
           
           results.updated++
-          console.log(`Updated user: ${authUser.email}`)
         } else {
           // Create new user
           const role = isSuperAdminEmail(authUser.email || '') ? 'SuperAdmin' : 'User'
@@ -74,7 +75,6 @@ export async function POST() {
           
           await adminDb.collection('users').doc(authUser.uid).set(userData)
           results.created++
-          console.log(`Created user: ${authUser.email} with role: ${role}`)
         }
       } catch (error) {
         results.errors++
@@ -84,7 +84,6 @@ export async function POST() {
       }
     }
     
-    console.log('User sync completed:', results)
     return NextResponse.json({ 
       message: 'User sync completed',
       results 

@@ -1,36 +1,24 @@
 'use client'
 
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SimpleDropdown } from '@/components/ui/simple-dropdown'
 import { Badge } from '@/components/ui/badge'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { X, Plus } from 'lucide-react'
+import { travellerFormSchema, type TravellerFormData } from '@/lib/utils/validation'
 
 interface SSRCode {
   code: string
   remark: string
 }
 
-interface TravellerFormData {
-  ptc: string
-  givenName: string
-  surname: string
-  gender: string
-  birthdate: string
-  nationality: string
-  phoneNumber: string
-  countryDialingCode: string
-  emailAddress: string
-  documentType: string
-  documentId: string
-  documentExpiryDate: string
-  ssrCodes: SSRCode[]
-  loyaltyAirlineCode: string
-  loyaltyAccountNumber: string
-}
+// TravellerFormData is now imported from validation.ts
 
 interface TravellerFormProps {
   onSubmit: (data: TravellerFormData) => void
@@ -108,59 +96,51 @@ const AIRLINE_CODES = [
 ]
 
 export function TravellerForm({ onSubmit, onCancel, initialData, isEditing = false }: TravellerFormProps) {
-  const [formData, setFormData] = useState<TravellerFormData>({
-    ptc: initialData?.ptc || 'Adult',
-    givenName: initialData?.givenName || '',
-    surname: initialData?.surname || '',
-    gender: initialData?.gender || 'Male',
-    birthdate: initialData?.birthdate || '',
-    nationality: initialData?.nationality || 'BD',
-    phoneNumber: initialData?.phoneNumber || '',
-    countryDialingCode: initialData?.countryDialingCode || '880',
-    emailAddress: initialData?.emailAddress || '',
-    documentType: initialData?.documentType || 'Passport',
-    documentId: initialData?.documentId || '',
-    documentExpiryDate: initialData?.documentExpiryDate || '',
-    ssrCodes: initialData?.ssrCodes || [],
-    loyaltyAirlineCode: initialData?.loyaltyAirlineCode || '',
-    loyaltyAccountNumber: initialData?.loyaltyAccountNumber || ''
-  })
-
   const [newSSRCode, setNewSSRCode] = useState('')
   const [newSSRRemark, setNewSSRRemark] = useState('')
 
-  const handleInputChange = (field: keyof TravellerFormData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
-  }
+  const form = useForm<TravellerFormData>({
+    resolver: zodResolver(travellerFormSchema),
+    defaultValues: {
+      ptc: initialData?.ptc || 'Adult',
+      givenName: initialData?.givenName || '',
+      surname: initialData?.surname || '',
+      gender: initialData?.gender || 'Male',
+      birthdate: initialData?.birthdate || '',
+      nationality: initialData?.nationality || 'BD',
+      phoneNumber: initialData?.phoneNumber || '',
+      countryDialingCode: initialData?.countryDialingCode || '880',
+      emailAddress: initialData?.emailAddress || '',
+      documentType: initialData?.documentType || 'Passport',
+      documentId: initialData?.documentId || '',
+      documentExpiryDate: initialData?.documentExpiryDate || '',
+      ssrCodes: initialData?.ssrCodes || [],
+      loyaltyAirlineCode: initialData?.loyaltyAirlineCode || '',
+      loyaltyAccountNumber: initialData?.loyaltyAccountNumber || ''
+    }
+  })
 
   const handleAddSSRCode = () => {
-    if (newSSRCode && !formData.ssrCodes.find(ssr => ssr.code === newSSRCode)) {
-      setFormData(prev => ({
-        ...prev,
-        ssrCodes: [...prev.ssrCodes, { code: newSSRCode, remark: newSSRRemark }]
-      }))
+    const currentSSRCodes = form.getValues('ssrCodes') || []
+    if (newSSRCode && !currentSSRCodes.find(ssr => ssr.code === newSSRCode)) {
+      form.setValue('ssrCodes', [...currentSSRCodes, { code: newSSRCode, remark: newSSRRemark }])
       setNewSSRCode('')
       setNewSSRRemark('')
     }
   }
 
   const handleRemoveSSRCode = (code: string) => {
-    setFormData(prev => ({
-      ...prev,
-      ssrCodes: prev.ssrCodes.filter(ssr => ssr.code !== code)
-    }))
+    const currentSSRCodes = form.getValues('ssrCodes') || []
+    form.setValue('ssrCodes', currentSSRCodes.filter(ssr => ssr.code !== code))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSubmit(formData)
+  const handleSubmit = (data: TravellerFormData) => {
+    onSubmit(data)
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
       {/* Personal Information */}
       <Card className="bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/30 dark:border-white/20">
         <CardHeader>
@@ -168,63 +148,111 @@ export function TravellerForm({ onSubmit, onCancel, initialData, isEditing = fal
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <div className="space-y-2">
-              <Label className="text-gray-900 dark:text-gray-100">PTC</Label>
-              <SimpleDropdown
-                id="ptc"
-                value={formData.ptc}
-                options={PTC_OPTIONS}
-                onChange={(value) => handleInputChange('ptc', value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-gray-900 dark:text-gray-100">Given Name</Label>
-              <Input
-                type="text"
-                value={formData.givenName}
-                onChange={(e) => handleInputChange('givenName', e.target.value)}
-                className="bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-gray-900 dark:text-gray-100">Surname</Label>
-              <Input
-                type="text"
-                value={formData.surname}
-                onChange={(e) => handleInputChange('surname', e.target.value)}
-                className="bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-gray-900 dark:text-gray-100">Gender</Label>
-              <SimpleDropdown
-                id="gender"
-                value={formData.gender}
-                options={GENDER_OPTIONS}
-                onChange={(value) => handleInputChange('gender', value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-gray-900 dark:text-gray-100">Birthdate</Label>
-              <Input
-                type="date"
-                value={formData.birthdate}
-                onChange={(e) => handleInputChange('birthdate', e.target.value)}
-                className="bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-gray-900 dark:text-gray-100">Nationality</Label>
-              <SimpleDropdown
-                id="nationality"
-                value={formData.nationality}
-                options={NATIONALITY_OPTIONS}
-                onChange={(value) => handleInputChange('nationality', value)}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="ptc"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-900 dark:text-gray-100">PTC</FormLabel>
+                  <FormControl>
+                    <SimpleDropdown
+                      id="ptc"
+                      value={field.value || 'Adult'}
+                      options={PTC_OPTIONS}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="givenName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-900 dark:text-gray-100">Given Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="text"
+                      className="bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="surname"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-900 dark:text-gray-100">Surname</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="text"
+                      className="bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="gender"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-900 dark:text-gray-100">Gender</FormLabel>
+                  <FormControl>
+                    <SimpleDropdown
+                      id="gender"
+                      value={field.value || 'Male'}
+                      options={GENDER_OPTIONS}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="birthdate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-900 dark:text-gray-100">Birthdate</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="date"
+                      className="bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="nationality"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-900 dark:text-gray-100">Nationality</FormLabel>
+                  <FormControl>
+                    <SimpleDropdown
+                      id="nationality"
+                      value={field.value || 'BD'}
+                      options={NATIONALITY_OPTIONS}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
         </CardContent>
       </Card>
@@ -236,37 +264,60 @@ export function TravellerForm({ onSubmit, onCancel, initialData, isEditing = fal
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label className="text-gray-900 dark:text-gray-100">Country Dialing Code</Label>
-              <SimpleDropdown
-                id="countryDialingCode"
-                value={formData.countryDialingCode}
-                options={COUNTRY_DIALING_CODES}
-                onChange={(value) => handleInputChange('countryDialingCode', value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-gray-900 dark:text-gray-100">Phone Number</Label>
-              <Input
-                type="tel"
-                value={formData.phoneNumber}
-                onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
-                className="bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100"
-                placeholder="1234567890"
-                required
-              />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label className="text-gray-900 dark:text-gray-100">Email Address</Label>
-              <Input
-                type="email"
-                value={formData.emailAddress}
-                onChange={(e) => handleInputChange('emailAddress', e.target.value)}
-                className="bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100"
-                placeholder="example@email.com"
-                required
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="countryDialingCode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-900 dark:text-gray-100">Country Dialing Code</FormLabel>
+                  <FormControl>
+                    <SimpleDropdown
+                      id="countryDialingCode"
+                      value={field.value || '880'}
+                      options={COUNTRY_DIALING_CODES}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="phoneNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-900 dark:text-gray-100">Phone Number</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="tel"
+                      className="bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100"
+                      placeholder="1234567890"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="emailAddress"
+              render={({ field }) => (
+                <FormItem className="sm:col-span-2">
+                  <FormLabel className="text-gray-900 dark:text-gray-100">Email Address</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="email"
+                      className="bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100"
+                      placeholder="example@email.com"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
         </CardContent>
       </Card>
@@ -278,36 +329,59 @@ export function TravellerForm({ onSubmit, onCancel, initialData, isEditing = fal
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <div className="space-y-2">
-              <Label className="text-gray-900 dark:text-gray-100">Type</Label>
-              <SimpleDropdown
-                id="documentType"
-                value={formData.documentType}
-                options={DOCUMENT_TYPE_OPTIONS}
-                onChange={(value) => handleInputChange('documentType', value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-gray-900 dark:text-gray-100">ID</Label>
-              <Input
-                type="text"
-                value={formData.documentId}
-                onChange={(e) => handleInputChange('documentId', e.target.value)}
-                className="bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100"
-                placeholder="BH345678"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-gray-900 dark:text-gray-100">Expiry Date</Label>
-              <Input
-                type="date"
-                value={formData.documentExpiryDate}
-                onChange={(e) => handleInputChange('documentExpiryDate', e.target.value)}
-                className="bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100"
-                required
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="documentType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-900 dark:text-gray-100">Type</FormLabel>
+                  <FormControl>
+                    <SimpleDropdown
+                      id="documentType"
+                      value={field.value || 'Passport'}
+                      options={DOCUMENT_TYPE_OPTIONS}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="documentId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-900 dark:text-gray-100">ID</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="text"
+                      className="bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100"
+                      placeholder="BH345678"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="documentExpiryDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-900 dark:text-gray-100">Expiry Date</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="date"
+                      className="bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
         </CardContent>
       </Card>
@@ -319,11 +393,11 @@ export function TravellerForm({ onSubmit, onCancel, initialData, isEditing = fal
         </CardHeader>
         <CardContent className="space-y-3">
           {/* Existing SSR Codes */}
-          {formData.ssrCodes.length > 0 && (
+          {form.watch('ssrCodes') && form.watch('ssrCodes')!.length > 0 && (
             <div className="space-y-2">
               <Label className="text-gray-900 dark:text-gray-100">Current SSR Codes</Label>
               <div className="flex flex-wrap gap-2">
-                {formData.ssrCodes.map((ssr) => (
+                {form.watch('ssrCodes')!.map((ssr) => (
                   <Badge key={ssr.code} variant="outline" className="flex items-center gap-1">
                     {ssr.code}
                     {ssr.remark && `: ${ssr.remark}`}
@@ -385,26 +459,43 @@ export function TravellerForm({ onSubmit, onCancel, initialData, isEditing = fal
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label className="text-gray-900 dark:text-gray-100">Airline Code</Label>
-              <SimpleDropdown
-                id="loyaltyAirlineCode"
-                value={formData.loyaltyAirlineCode}
-                options={AIRLINE_CODES}
-                onChange={(value) => handleInputChange('loyaltyAirlineCode', value)}
-                placeholder="Select Airline"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-gray-900 dark:text-gray-100">Loyalty Account Number</Label>
-              <Input
-                type="text"
-                value={formData.loyaltyAccountNumber}
-                onChange={(e) => handleInputChange('loyaltyAccountNumber', e.target.value)}
-                className="bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100"
-                placeholder="1234567"
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="loyaltyAirlineCode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-900 dark:text-gray-100">Airline Code</FormLabel>
+                  <FormControl>
+                    <SimpleDropdown
+                      id="loyaltyAirlineCode"
+                      value={field.value || ''}
+                      options={AIRLINE_CODES}
+                      onChange={field.onChange}
+                      placeholder="Select Airline"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="loyaltyAccountNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-900 dark:text-gray-100">Loyalty Account Number</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="text"
+                      className="bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100"
+                      placeholder="1234567"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
         </CardContent>
       </Card>
@@ -426,6 +517,7 @@ export function TravellerForm({ onSubmit, onCancel, initialData, isEditing = fal
           {isEditing ? 'Update Traveller' : 'Add Traveller'}
         </Button>
       </div>
-    </form>
+      </form>
+    </Form>
   )
 }

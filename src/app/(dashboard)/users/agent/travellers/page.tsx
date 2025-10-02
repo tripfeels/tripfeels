@@ -65,6 +65,7 @@ export default function AgentTravellersPage() {
   const [travellers, setTravellers] = useState(mockTravellers)
   const [isLoading, setIsLoading] = useState(false)
   const [showAddForm, setShowAddForm] = useState(false)
+  const [editingTraveller, setEditingTraveller] = useState<any>(null)
 
   // Redirect if not authenticated or not Agent
   useEffect(() => {
@@ -80,31 +81,74 @@ export default function AgentTravellersPage() {
   }
 
   const handleEditTraveller = (id: string) => {
-    // TODO: Implement edit functionality
-    console.log('Edit traveller:', id)
-  }
-
-  const handleFormSubmit = (formData: any) => {
-    // TODO: Implement form submission
-    console.log('Form submitted:', formData)
-    setShowAddForm(false)
-    // Add new traveller to list
-    const newTraveller = {
-      id: Date.now().toString(),
-      ...formData,
-      createdBy: 'Agent',
-      createdAt: new Date().toISOString().split('T')[0],
-      lastModified: new Date().toISOString().split('T')[0]
+    const travellerToEdit = travellers.find(t => t.id === id)
+    if (travellerToEdit) {
+      setEditingTraveller(travellerToEdit)
+      setShowAddForm(true)
     }
-    setTravellers(prev => [...prev, newTraveller])
   }
 
-  const refreshTravellers = () => {
-    setIsLoading(true)
-    // TODO: Implement actual data fetching
-    setTimeout(() => {
+  const handleFormSubmit = async (formData: any) => {
+    try {
+      setIsLoading(true)
+      
+      if (editingTraveller) {
+        // Update existing traveller
+        const response = await fetch(`/api/travellers/${editingTraveller.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        })
+        
+        if (response.ok) {
+          setTravellers(prev => prev.map(t => 
+            t.id === editingTraveller.id ? { ...t, ...formData } : t
+          ))
+        }
+      } else {
+        // Create new traveller
+        const response = await fetch('/api/travellers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        })
+        
+        if (response.ok) {
+          setTravellers(prev => [...prev, {
+            id: Date.now().toString(),
+            ...formData,
+            createdBy: 'Agent',
+            createdAt: new Date().toISOString().split('T')[0],
+            lastModified: new Date().toISOString().split('T')[0]
+          }])
+        }
+      }
+      
+      setShowAddForm(false)
+      setEditingTraveller(null)
+    } catch (error) {
+      console.error('Error submitting form:', error)
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
+  }
+
+  const refreshTravellers = async () => {
+    try {
+      setIsLoading(true)
+      const response = await fetch('/api/travellers')
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.travellers) {
+          setTravellers(data.travellers)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching travellers:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   if (status === 'loading') {
@@ -137,9 +181,14 @@ export default function AgentTravellersPage() {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-3xl w-full max-h-[75vh] overflow-y-auto">
             <div className="p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100">Add New Traveller</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
+                  {editingTraveller ? 'Edit Traveller' : 'Add New Traveller'}
+                </h2>
                 <button
-                  onClick={() => setShowAddForm(false)}
+                  onClick={() => {
+                    setShowAddForm(false)
+                    setEditingTraveller(null)
+                  }}
                   className="text-gray-500 hover:text-gray-700 text-xl p-1"
                 >
                   ×
@@ -147,8 +196,12 @@ export default function AgentTravellersPage() {
               </div>
               
               <TravellerForm
+                initialData={editingTraveller}
                 onSubmit={handleFormSubmit}
-                onCancel={() => setShowAddForm(false)}
+                onCancel={() => {
+                  setShowAddForm(false)
+                  setEditingTraveller(null)
+                }}
               />
             </div>
           </div>

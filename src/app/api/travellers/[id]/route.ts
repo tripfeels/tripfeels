@@ -60,6 +60,14 @@ export async function PUT(
       })
     }
     
+    // Helper function to convert empty strings to null for date fields
+    const processDateField = (dateValue: any) => {
+      if (!dateValue || dateValue === '' || dateValue === 'undefined') {
+        return null
+      }
+      return dateValue
+    }
+
     // Update traveller
     const { id } = await params
     const traveller = await updateTraveller(
@@ -69,14 +77,14 @@ export async function PUT(
         givenName: body.givenName,
         surname: body.surname,
         gender: body.gender,
-        birthdate: body.birthdate,
+        birthdate: processDateField(body.birthdate),
         nationality: body.nationality,
         phoneNumber: body.phoneNumber,
         countryDialingCode: body.countryDialingCode,
         emailAddress: body.emailAddress,
         documentType: body.documentType,
         documentId: body.documentId,
-        documentExpiryDate: body.documentExpiryDate,
+        documentExpiryDate: processDateField(body.documentExpiryDate),
         ssrCodes: ssrCodes,
         ssrRemarks: ssrRemarks,
         loyaltyAirlineCode: body.loyaltyAirlineCode,

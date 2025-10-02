@@ -24,6 +24,16 @@ export default function AdminUserManagement() {
   const [editingUser, setEditingUser] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<Partial<UserDocument>>({})
   const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set())
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [totalPages, setTotalPages] = useState<number>(1)
+  const [totalUsers, setTotalUsers] = useState<number>(0)
+  const [hasNext, setHasNext] = useState<boolean>(false)
+  const [hasPrev, setHasPrev] = useState<boolean>(false)
+  
+  // Request deduplication
+  const loadingRef = useRef<AbortController | null>(null)
 
   const roleOptions: RoleType[] = useMemo(() => [
     ROLES.SUPER_ADMIN,
@@ -105,45 +115,97 @@ export default function AdminUserManagement() {
     )
   }
 
-  const loadUsers = async () => {
+  const loadUsers = async (page: number = 1) => {
+    // Cancel any existing request
+    if (loadingRef.current) {
+      loadingRef.current.abort()
+    }
+    
+    // Create new abort controller
+    const controller = new AbortController()
+    loadingRef.current = controller
+    
     try {
       setIsLoading(true)
-      const res = await fetch('/api/admin/users')
-      if (!res.ok) throw new Error('fetch')
+      setError(null) // Clear previous errors
+      
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '20',
+        ...(roleFilter !== 'All' && { role: roleFilter }),
+        ...(search && { search })
+      })
+      
+      const res = await fetch(`/api/admin/users?${params}`, {
+        signal: controller.signal,
+        // Add cache headers to prevent unnecessary requests
+        headers: {
+          'Cache-Control': 'max-age=60' // Cache for 1 minute
+        }
+      })
+      
+      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch users`)
       const json = await res.json()
+      
+      // Check if request was aborted
+      if (controller.signal.aborted) return
+      
       setUsers(json.users as UserDocument[])
+      
+      // Update pagination state
+      if (json.pagination) {
+        setCurrentPage(json.pagination.page)
+        setTotalPages(Math.ceil(json.pagination.total / json.pagination.limit))
+        setTotalUsers(json.pagination.total)
+        setHasNext(json.pagination.hasNext)
+        setHasPrev(json.pagination.hasPrev)
+      }
     } catch (e) {
-      setError('Failed to load users')
+      // Don't show error if request was aborted
+      if (e instanceof Error && e.name === 'AbortError') return
+      
+      console.error('Error loading users:', e)
+      setError(e instanceof Error ? e.message : 'Failed to load users')
     } finally {
-      setIsLoading(false)
+      if (!controller.signal.aborted) {
+        setIsLoading(false)
+      }
+      loadingRef.current = null
     }
   }
 
   useEffect(() => {
-    loadUsers()
-  }, [])
+    loadUsers(1)
+    
+    // Cleanup on unmount
+    return () => {
+      if (loadingRef.current) {
+        loadingRef.current.abort()
+      }
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Refresh users data when session changes (after login)
   useEffect(() => {
-    if (session && !isLoading) {
-      loadUsers()
+    if (session) {
+      loadUsers(1)
     }
-  }, [session])
+  }, [session]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const filteredUsers = useMemo(() => {
-    return users
-      .filter(u => roleFilter === 'All' ? true : u.role === roleFilter)
-      .filter(u => {
-        const q = search.trim().toLowerCase()
-        if (!q) return true
-        const name = `${u.profile?.firstName ?? ''} ${u.profile?.lastName ?? ''}`.toLowerCase()
-        return (
-          u.email.toLowerCase().includes(q) ||
-          name.includes(q) ||
-          (u.category?.toLowerCase() ?? '').includes(q)
-        )
-      })
-  }, [users, roleFilter, search])
+  // Debounced search effect
+  useEffect(() => {
+    if (!session) return
+
+    const timeoutId = setTimeout(() => {
+      setCurrentPage(1)
+      loadUsers(1)
+    }, search ? 500 : 100) // 500ms debounce for search, 100ms for role filter
+
+    return () => clearTimeout(timeoutId)
+  }, [roleFilter, search, session]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Since filtering is now done server-side, we can use users directly
+  const filteredUsers = users
 
   const isSessionLoading = status === 'loading'
   const canManage = !isSessionLoading && (currentUserRole === ROLES.SUPER_ADMIN || currentUserRole === ROLES.ADMIN)
@@ -308,7 +370,7 @@ export default function AdminUserManagement() {
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">User Management</h1>
               <button
-                onClick={loadUsers}
+                onClick={() => loadUsers(currentPage)}
                 disabled={isLoading}
                 className="p-2 rounded-lg bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/30 transition-colors duration-200 disabled:opacity-50"
                 title="Refresh users data"
@@ -352,20 +414,29 @@ export default function AdminUserManagement() {
         </div>
       )}
 
-      {isLoading ? (
+      {currentUserRole === ROLES.ADMIN && (
+        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className="text-sm text-blue-800 dark:text-blue-200">
+            <strong>Admin Notice:</strong> As an Admin, you cannot modify SuperAdmin users. 
+            SuperAdmin accounts can only be managed by other SuperAdmins.
+          </div>
+        </div>
+      )}
+
+      {isLoading && filteredUsers.length === 0 ? (
         <UserManagementPageSkeleton />
       ) : (
         <>
-          {currentUserRole === ROLES.ADMIN && (
-            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-              <div className="text-sm text-blue-800 dark:text-blue-200">
-                <strong>Admin Notice:</strong> As an Admin, you cannot modify SuperAdmin users. 
-                SuperAdmin accounts can only be managed by other SuperAdmins.
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto rounded-xl border border-white/30 bg-white/20 backdrop-blur-md shadow-lg relative">
+          {isLoading && filteredUsers.length > 0 && (
+            <div className="absolute inset-0 bg-white/50 dark:bg-black/50 backdrop-blur-sm z-10 flex items-center justify-center rounded-xl">
+              <div className="flex items-center space-x-2 bg-white/80 dark:bg-gray-800/80 px-4 py-2 rounded-lg shadow-lg">
+                <RefreshCw className="h-4 w-4 animate-spin text-blue-600 dark:text-blue-400" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">Loading...</span>
               </div>
             </div>
           )}
-        {/* Desktop Table View */}
-        <div className="hidden md:block overflow-x-auto rounded-xl border border-white/30 bg-white/20 backdrop-blur-md shadow-lg relative">
           <table className="min-w-full text-sm">
             <thead className="bg-white/20 backdrop-blur-sm">
               <tr>
@@ -431,6 +502,14 @@ export default function AdminUserManagement() {
 
         {/* Mobile Card View */}
         <div className="md:hidden space-y-4 overflow-visible relative z-0">
+          {isLoading && filteredUsers.length > 0 && (
+            <div className="absolute inset-0 bg-white/50 dark:bg-black/50 backdrop-blur-sm z-10 flex items-center justify-center rounded-xl">
+              <div className="flex items-center space-x-2 bg-white/80 dark:bg-gray-800/80 px-4 py-2 rounded-lg shadow-lg">
+                <RefreshCw className="h-4 w-4 animate-spin text-blue-600 dark:text-blue-400" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">Loading...</span>
+              </div>
+            </div>
+          )}
           {filteredUsers.map((user, idx) => {
             const fullName = `${user.profile?.firstName ?? ''} ${user.profile?.lastName ?? ''}`.trim()
             const isSuperAdmin = user.role === ROLES.SUPER_ADMIN
@@ -679,6 +758,59 @@ export default function AdminUserManagement() {
               <div className="text-sm text-gray-600 dark:text-gray-400">No users found.</div>
             </div>
           )}
+        </div>
+
+        {/* Pagination Controls */}
+        <div className={`mt-6 transition-opacity duration-200 ${totalPages > 1 ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {isLoading ? (
+                <div className="h-5 w-48 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+              ) : (
+                `Showing ${((currentPage - 1) * 20) + 1} to ${Math.min(currentPage * 20, totalUsers)} of ${totalUsers} users`
+              )}
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => loadUsers(currentPage - 1)}
+                disabled={!hasPrev || isLoading}
+                className="px-3 py-2 text-sm font-medium bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100 rounded-lg hover:bg-white/30 dark:hover:bg-white/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              
+              <div className="flex items-center space-x-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i
+                  if (pageNum > totalPages) return null
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => loadUsers(pageNum)}
+                      disabled={isLoading}
+                      className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                        pageNum === currentPage
+                          ? 'bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30'
+                          : 'bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100 hover:bg-white/30 dark:hover:bg-white/20'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      {pageNum}
+                    </button>
+                  )
+                })}
+              </div>
+              
+              <button
+                onClick={() => loadUsers(currentPage + 1)}
+                disabled={!hasNext || isLoading}
+                className="px-3 py-2 text-sm font-medium bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100 rounded-lg hover:bg-white/30 dark:hover:bg-white/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
         </div>
         </>
       )}

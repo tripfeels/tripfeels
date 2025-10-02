@@ -5,14 +5,17 @@ import { adminDb, adminAuth } from '@/lib/firebase/admin'
 
 export async function GET() {
   try {
+    // Only allow in development environment
+    if (process.env.NODE_ENV !== 'development') {
+      return NextResponse.json({ error: 'Debug endpoints are only available in development' }, { status: 404 })
+    }
+
     const session = await getServerSession(authOptions)
     
     if (!session) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    console.log('Debug: Fetching all users from Firestore...')
-    
     // Get all users from Firestore
     const snapshot = await adminDb.collection('users').get()
     const users = snapshot.docs.map(doc => ({
@@ -20,11 +23,8 @@ export async function GET() {
       ...doc.data()
     }))
     
-    console.log(`Debug: Found ${users.length} users in Firestore`)
-    
     // Also check Firebase Auth users
     const authUsers = await adminAuth.listUsers()
-    console.log(`Debug: Found ${authUsers.users.length} users in Firebase Auth`)
     
     return NextResponse.json({ 
       firestoreUsers: users.length,

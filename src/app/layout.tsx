@@ -5,6 +5,8 @@ import { Analytics } from '@vercel/analytics/react'
 import { AuthSessionProvider } from '@/components/providers/session-provider'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { ThemeProvider as CustomThemeProvider } from '@/contexts/theme-context'
+import { ErrorBoundary } from '@/components/error/ErrorBoundary'
+import { ErrorMonitoringProvider } from '@/components/providers/error-monitoring-provider'
 import './globals.css'
 
 const poppins = Poppins({ 
@@ -131,16 +133,20 @@ export default function RootLayout({
             })
           }}
         />
-        <ThemeProvider
-          defaultTheme="system"
-          storageKey="tripfeels-theme"
-        >
-          <CustomThemeProvider>
-            <AuthSessionProvider>
-              {children}
-            </AuthSessionProvider>
-          </CustomThemeProvider>
-        </ThemeProvider>
+        <ErrorBoundary>
+          <ThemeProvider
+            defaultTheme="system"
+            storageKey="tripfeels-theme"
+          >
+            <CustomThemeProvider>
+              <AuthSessionProvider>
+                <ErrorMonitoringProvider>
+                  {children}
+                </ErrorMonitoringProvider>
+              </AuthSessionProvider>
+            </CustomThemeProvider>
+          </ThemeProvider>
+        </ErrorBoundary>
         <Analytics />
       </body>
     </html>

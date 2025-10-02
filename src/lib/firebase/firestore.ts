@@ -76,7 +76,6 @@ export const createUser = async (userData: Partial<UserDocument>) => {
     assignedBy: userData.assignedBy || ''
   }
   
-  console.log('Creating user document:', userDoc)
   await setDoc(userRef, userDoc)
   
   return userRef
@@ -151,12 +150,18 @@ export const getAllUsers = async (limitCount = 50) => {
   }
 }
 
-// Special admin emails
-export const SUPER_ADMIN_EMAILS = [
-  'babuas25@gmail.com',
-  'md.ashifbabu@gmail.com'
-]
+// Get super admin emails from environment variables
+export const getSuperAdminEmails = (): string[] => {
+  // Check both server-side and client-side environment variables
+  const emails = process.env.SUPER_ADMIN_EMAILS || process.env.NEXT_PUBLIC_SUPER_ADMIN_EMAILS
+  if (!emails) {
+    console.warn('SUPER_ADMIN_EMAILS environment variable not set. Using fallback emails.')
+    return ['babuas25@gmail.com', 'md.ashifbabu@gmail.com']
+  }
+  return emails.split(',').map(email => email.trim().toLowerCase())
+}
 
 export const isSuperAdminEmail = (email: string): boolean => {
-  return SUPER_ADMIN_EMAILS.includes(email.toLowerCase())
+  const superAdminEmails = getSuperAdminEmails()
+  return superAdminEmails.includes(email.toLowerCase())
 }
