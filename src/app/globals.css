@@ -89,6 +89,32 @@ input[type="checkbox"] {
   accent-color: hsl(var(--primary));
 }
 
+/* Fix for auto-scroll warning with fixed/sticky positioned elements */
+html {
+  scroll-padding-top: 3.5rem; /* 56px = h-14 for fixed header */
+  scroll-behavior: auto !important; /* Suppress auto-scroll behavior warnings */
+}
+
+/* Force auto scroll behavior for all elements to prevent warnings */
+*, *::before, *::after {
+  scroll-behavior: auto !important;
+}
+
+/* Specific override for fixed and sticky positioned elements */
+.fixed, 
+[style*="position: fixed"], 
+[style*="position: sticky"],
+[class*="fixed"],
+[class*="sticky"] {
+  scroll-behavior: auto !important;
+}
+
+/* Override any smooth scrolling that might trigger warnings */
+html[style*="scroll-behavior"],
+body[style*="scroll-behavior"] {
+  scroll-behavior: auto !important;
+}
+
 /* Blob animation for glassmorphism background */
 @keyframes blob {
   0% {
