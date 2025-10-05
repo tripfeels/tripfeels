@@ -78,14 +78,23 @@ export const getSuperAdminEmails = (): readonly string[] => {
   // Check both server-side and client-side environment variables
   const emails = process.env.SUPER_ADMIN_EMAILS || process.env.NEXT_PUBLIC_SUPER_ADMIN_EMAILS
   if (!emails) {
-    console.warn('SUPER_ADMIN_EMAILS environment variable not set. Using fallback emails.')
+    // Only show warning in development environment
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('SUPER_ADMIN_EMAILS environment variable not set. Using fallback emails.')
+    }
     return ['babuas25@gmail.com', 'md.ashifbabu@gmail.com'] as const
   }
   return emails.split(',').map(email => email.trim().toLowerCase()) as readonly string[]
 }
 
-// For backward compatibility, but prefer using getSuperAdminEmails() function
-export const SUPER_ADMIN_EMAILS = getSuperAdminEmails()
+// For backward compatibility - use lazy getter to avoid early execution
+let _superAdminEmails: readonly string[] | undefined
+export const SUPER_ADMIN_EMAILS = (() => {
+  if (!_superAdminEmails) {
+    _superAdminEmails = getSuperAdminEmails()
+  }
+  return _superAdminEmails
+})
 
 // Navigation menu items by role
 export const NAVIGATION_ITEMS = {

@@ -13,6 +13,7 @@ import {
   Timestamp 
 } from 'firebase/firestore'
 import { db } from './config'
+import { getSuperAdminEmails } from '@/lib/utils/constants'
 
 // User document interface
 export interface UserDocument {
@@ -148,17 +149,6 @@ export const getAllUsers = async (limitCount = 50) => {
     const fallbackSnapshot = await getDocs(query(usersRef, limit(limitCount)))
     return fallbackSnapshot.docs.map(doc => doc.data() as UserDocument)
   }
-}
-
-// Get super admin emails from environment variables
-export const getSuperAdminEmails = (): string[] => {
-  // Check both server-side and client-side environment variables
-  const emails = process.env.SUPER_ADMIN_EMAILS || process.env.NEXT_PUBLIC_SUPER_ADMIN_EMAILS
-  if (!emails) {
-    console.warn('SUPER_ADMIN_EMAILS environment variable not set. Using fallback emails.')
-    return ['babuas25@gmail.com', 'md.ashifbabu@gmail.com']
-  }
-  return emails.split(',').map(email => email.trim().toLowerCase())
 }
 
 export const isSuperAdminEmail = (email: string): boolean => {
