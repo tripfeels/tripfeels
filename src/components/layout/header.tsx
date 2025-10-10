@@ -96,7 +96,10 @@ export function Header({ className, showNavigation = true, showUserActions = tru
 
   return (
     <header className={cn(
-      "fixed top-0 left-0 right-0 z-40 h-14 backdrop-blur-md bg-white/20 dark:bg-white/10 border-b border-white/30 dark:border-white/20 shadow-lg",
+      "fixed top-0 left-0 right-0 z-40 h-14 backdrop-blur-md border-b shadow-lg",
+      // Stable glass background (independent from what's behind)
+      "bg-white/30 dark:bg-white/15",
+      "border-white/30 dark:border-white/20",
       className
     )}>
       <div className="flex items-center justify-between px-4 h-full max-w-7xl mx-auto">

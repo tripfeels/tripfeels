@@ -180,7 +180,14 @@ export default function AuthPage() {
   }
 
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-green-100 to-green-800 dark:from-green-900 dark:via-green-800 dark:to-green-950 animated-gradient">
+      {/* Animated background elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-32 w-80 h-80 bg-green-200/30 dark:bg-green-400/20 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-green-400/30 dark:bg-green-600/20 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-green-300/30 dark:bg-green-500/20 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-4000"></div>
+      </div>
+
       <Header 
         showNavigation={false} 
         showUserActions={true} 
@@ -596,6 +603,6 @@ export default function AuthPage() {
         </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }

@@ -41,13 +41,12 @@ export default function SuperAdminThemePage() {
   }
 
   const handlePreview = () => {
-    // Open theme demo page in new tab to preview changes
     window.open('/theme-demo', '_blank')
   }
 
   return (
     <div className="space-y-6">
-      <div className="p-6 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-xl border border-white/30 dark:border-white/20 shadow-lg">
+      <div className="p-6 glass-card rounded-xl border border-white/30 dark:border-white/20 shadow-lg">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Theme Management</h1>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
           Customize your application&apos;s appearance, logo, and branding.
@@ -55,7 +54,7 @@ export default function SuperAdminThemePage() {
       </div>
 
       <Tabs defaultValue="logo" className="space-y-6">
-        <TabsList className="!flex !w-full !flex-wrap !gap-1 !h-auto !p-2">
+        <TabsList className="!flex !w-full !flex-wrap !gap-1 !h-auto !p-2 glass-tabs">
           <TabsTrigger value="logo" className="!text-xs md:!text-sm !flex-1 !min-w-[calc(50%-0.125rem)] md:!min-w-0 !px-2 !py-2">Logo Settings</TabsTrigger>
           <TabsTrigger value="colors" className="!text-xs md:!text-sm !flex-1 !min-w-[calc(50%-0.125rem)] md:!min-w-0 !px-2 !py-2">Color Scheme</TabsTrigger>
           <TabsTrigger value="slideshow" className="!text-xs md:!text-sm !flex-1 !min-w-[calc(50%-0.125rem)] md:!min-w-0 !px-2 !py-2">Slideshow</TabsTrigger>
@@ -63,8 +62,8 @@ export default function SuperAdminThemePage() {
         </TabsList>
 
         <TabsContent value="logo" className="space-y-6">
-          <div className="bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-xl border border-white/30 dark:border-white/20 shadow-lg">
-            <div className="p-6 border-b border-white/20 dark:border-white/10">
+          <div className="glass-card">
+            <div className="p-6 border-b glass-border">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                 <Type className="h-5 w-5" />
                 Logo Configuration
@@ -210,8 +209,8 @@ export default function SuperAdminThemePage() {
         </TabsContent>
 
         <TabsContent value="colors" className="space-y-6">
-          <div className="bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-xl border border-white/30 dark:border-white/20 shadow-lg">
-            <div className="p-6 border-b border-white/20 dark:border-white/10">
+          <div className="glass-card">
+            <div className="p-6 border-b glass-border">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Color Scheme</h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 Choose from predefined color themes that work in both light and dark modes
@@ -440,8 +439,8 @@ export default function SuperAdminThemePage() {
         </TabsContent>
 
         <TabsContent value="slideshow" className="space-y-6">
-          <div className="bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-xl border border-white/30 dark:border-white/20 shadow-lg">
-            <div className="p-6 border-b border-white/20 dark:border-white/10">
+          <div className="glass-card">
+            <div className="p-6 border-b glass-border">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Auth Slideshow</h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Manage images for the left-side slideshow on the auth page</p>
             </div>
@@ -452,8 +451,8 @@ export default function SuperAdminThemePage() {
         </TabsContent>
 
         <TabsContent value="preview" className="space-y-6">
-          <div className="bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-xl border border-white/30 dark:border-white/20 shadow-lg">
-            <div className="p-6 border-b border-white/20 dark:border-white/10">
+          <div className="glass-card">
+            <div className="p-6 border-b glass-border">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Theme Preview</h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 Preview your theme changes before applying

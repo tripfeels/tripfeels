@@ -55,9 +55,10 @@ interface SidebarProps {
   className?: string
   isMobile?: boolean
   onClose?: () => void
+  onCollapseChange?: (isCollapsed: boolean) => void
 }
 
-export function Sidebar({ className, isMobile = false, onClose }: SidebarProps) {
+export function Sidebar({ className, isMobile = false, onClose, onCollapseChange }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(true)
   const { data: session } = useSession()
   const pathname = usePathname()
@@ -110,7 +111,11 @@ export function Sidebar({ className, isMobile = false, onClose }: SidebarProps) 
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setIsCollapsed(!isCollapsed)}
+              onClick={() => {
+                const newCollapsed = !isCollapsed
+                setIsCollapsed(newCollapsed)
+                onCollapseChange?.(newCollapsed)
+              }}
               className="h-8 w-8 font-bold hover:bg-white/20 dark:hover:bg-white/10 border border-white/30 dark:border-white/20 bg-white/10 dark:bg-white/5 backdrop-blur-sm rounded-lg"
               aria-label={`${isCollapsed ? 'Expand' : 'Collapse'} sidebar`}
             >

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { HomePageClient } from './home-page-client'
-import { Footer } from '@/components/layout/footer'
 
 export const metadata: Metadata = {
   title: 'Welcome to TripFeels - Role-Based Dashboard',
@@ -15,7 +14,6 @@ export default function HomePage() {
   return (
     <>
       <HomePageClient />
-      <Footer />
     </>
   )
 }

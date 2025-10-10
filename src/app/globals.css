@@ -134,11 +134,59 @@ body[style*="scroll-behavior"] {
 .animate-blob {
   animation: blob 7s infinite;
 }
-
 .animation-delay-2000 {
   animation-delay: 2s;
 }
 
 .animation-delay-4000 {
   animation-delay: 4s;
+}
+
+/* Animated gradient background utility */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+.animated-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 18s ease-in-out infinite;
+}
+
+/* Reusable glassmorphism and theme utilities */
+@layer utilities {
+  /* Cards and panels */
+  .glass-card {
+    @apply bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/30 dark:border-white/20 shadow-lg rounded-xl;
+  }
+  .glass-panel {
+    @apply bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/30 dark:border-white/20 rounded-xl;
+  }
+  .glass-surface {
+    @apply bg-white/15 dark:bg-white/10 backdrop-blur-md border border-white/20 dark:border-white/10 rounded-xl;
+  }
+  .glass-border {
+    @apply border-white/30 dark:border-white/20;
+  }
+
+  /* Inputs */
+  .glass-input {
+    @apply h-10 bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 rounded-lg;
+  }
+
+  /* Tabs container */
+  .glass-tabs {
+    @apply bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 rounded-lg;
+  }
+
+  /* Reusable green gradient wrapper */
+  .green-gradient-bg {
+    @apply min-h-screen bg-gradient-to-br from-green-50 via-green-100 to-green-800 dark:from-green-900 dark:via-green-800 dark:to-green-950 animated-gradient;
+  }
 }

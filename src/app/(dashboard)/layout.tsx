@@ -11,6 +11,7 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
 
   const toggleMobileSidebar = () => {
     setIsMobileSidebarOpen(!isMobileSidebarOpen)
@@ -21,12 +22,12 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-green-100 to-green-800 dark:from-green-900 dark:via-green-800 dark:to-green-950 animated-gradient">
       {/* Animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-32 w-80 h-80 bg-blue-200/30 dark:bg-blue-400/20 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-indigo-200/30 dark:bg-indigo-400/20 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-slate-200/30 dark:bg-slate-400/20 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-4000"></div>
+        <div className="absolute -top-40 -right-32 w-80 h-80 bg-green-200/30 dark:bg-green-400/20 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-green-400/30 dark:bg-green-600/20 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-green-300/30 dark:bg-green-500/20 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-4000"></div>
       </div>
       
       <Header 
@@ -34,11 +35,15 @@ export default function DashboardLayout({
         showUserActions={true} 
         onMobileMenuToggle={toggleMobileSidebar}
       />
-      <div className="flex pt-14 relative z-10">
-        {/* Desktop Sidebar */}
-        <div className="hidden md:block h-[calc(100vh-3.5rem)] flex">
-          <Sidebar />
+      <div className="flex relative z-10 h-screen">
+        {/* Desktop Sidebar (fixed) */}
+        <div className="hidden md:block">
+          <div className="fixed top-14 bottom-0 left-0 z-30">
+            <Sidebar onCollapseChange={setIsSidebarCollapsed} className="h-full" />
+          </div>
         </div>
+        {/* Sidebar spacer to keep layout aligned with fixed sidebar */}
+        <div className={`hidden md:block ${isSidebarCollapsed ? 'w-20' : 'w-64'}`}></div>
         
         {/* Mobile Sidebar Overlay */}
         {isMobileSidebarOpen && (
@@ -60,10 +65,12 @@ export default function DashboardLayout({
           </div>
         )}
         
-        <main className="flex-1 overflow-auto p-6 pb-4">
+        <main className="flex-1 overflow-auto p-6 pt-24 pb-20">
           {children}
-          <Footer />
         </main>
+      </div>
+      <div className={`fixed bottom-0 left-0 right-0 transition-all duration-300 ${isSidebarCollapsed ? 'md:left-20' : 'md:left-64'}`}>
+        <Footer />
       </div>
     </div>
   )
