@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Sidebar } from '@/components/layout/sidebar'
 import { Header } from '@/components/layout/header'
+import { Footer } from '@/components/layout/footer'
 
 export default function DashboardLayout({
   children,
@@ -59,8 +60,9 @@ export default function DashboardLayout({
           </div>
         )}
         
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 overflow-auto p-6 pb-4">
           {children}
+          <Footer />
         </main>
       </div>
     </div>

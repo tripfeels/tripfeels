@@ -163,19 +163,33 @@ export function Sidebar({ className, isMobile = false, onClose }: SidebarProps) 
             <p className="text-xs text-gray-600 dark:text-gray-400">{session.user.role}</p>
           </div>
         )}
-        <Button
-          variant="ghost"
-          size={shouldShowText ? "sm" : "icon"}
-          onClick={() => {
-            if (isMobile && onClose) onClose()
-            signOut({ callbackUrl: '/' })
-          }}
-          className="w-full justify-start px-3 py-2 hover:bg-white/20 dark:hover:bg-white/10 border border-white/30 dark:border-white/20 bg-white/10 dark:bg-white/5 backdrop-blur-sm rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-          aria-label="Sign out"
-        >
-          <LogOut className="h-5 w-5 flex-shrink-0" />
-          {shouldShowText && <span className="ml-3">Sign Out</span>}
-        </Button>
+        {session?.user ? (
+          <Button
+            variant="ghost"
+            size={shouldShowText ? "sm" : "icon"}
+            onClick={() => {
+              if (isMobile && onClose) onClose()
+              signOut({ callbackUrl: '/' })
+            }}
+            className="w-full justify-start px-3 py-2 hover:bg-white/20 dark:hover:bg-white/10 border border-white/30 dark:border-white/20 bg-white/10 dark:bg-white/5 backdrop-blur-sm rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+            aria-label="Sign out"
+          >
+            <LogOut className="h-5 w-5 flex-shrink-0" />
+            {shouldShowText && <span className="ml-3">Sign Out</span>}
+          </Button>
+        ) : (
+          <Link href="/auth" onClick={isMobile ? onClose : undefined}>
+            <Button
+              variant="ghost"
+              size={shouldShowText ? "sm" : "icon"}
+              className="w-full justify-start px-3 py-2 hover:bg-white/20 dark:hover:bg-white/10 border border-white/30 dark:border-white/20 bg-white/10 dark:bg-white/5 backdrop-blur-sm rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+              aria-label="Sign in"
+            >
+              <User className="h-5 w-5 flex-shrink-0" />
+              {shouldShowText && <span className="ml-3">Sign In</span>}
+            </Button>
+          </Link>
+        )}
       </div>
     </div>
   )
