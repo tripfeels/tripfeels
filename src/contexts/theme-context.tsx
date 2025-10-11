@@ -1,6 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { getTheme, saveTheme } from '@/lib/firebase/theme'
 
 interface ThemeContextType {
   logoType: 'text' | 'image'
@@ -39,31 +40,44 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [gradientVia, setGradientVia] = useState<string>('#d1fae5')
   const [gradientTo, setGradientTo] = useState<string>('#064e3b')
 
-  const loadThemeSettings = useCallback(() => {
+  const loadThemeSettings = useCallback(async () => {
     try {
-      const saved = localStorage.getItem('tripfeels-theme-settings')
-      if (saved) {
-        const settings = JSON.parse(saved)
-        setLogoType(settings.logoType || 'text')
-        setTextLogo(settings.textLogo || 'tripfeels')
-        setLogoImage(settings.logoImage || null)
-        setColorTheme(settings.colorTheme || 'slate')
-        setBgStyle(settings.bgStyle || 'animated')
-        setSolidColor(settings.solidColor || '#e8f5e9')
-        setGradientFrom(settings.gradientFrom || '#ecfdf5')
-        setGradientVia(settings.gradientVia || '#d1fae5')
-        setGradientTo(settings.gradientTo || '#064e3b')
+      // Try Firestore first
+      const remote = await getTheme()
+      if (remote) {
+        setColorTheme(remote.colorTheme || 'slate')
+        setBgStyle(remote.bgStyle || 'animated')
+        setSolidColor(remote.solidColor || '#e8f5e9')
+        setGradientFrom(remote.gradientFrom || '#ecfdf5')
+        setGradientVia(remote.gradientVia || '#d1fae5')
+        setGradientTo(remote.gradientTo || '#064e3b')
+        // hydrate local cache as well
+        localStorage.setItem('tripfeels-theme-settings', JSON.stringify(remote))
       } else {
-        // Set default theme for new users
-        setColorTheme('slate')
-        setLogoType('text')
-        setTextLogo('tripfeels')
-        setLogoImage(null)
-        setBgStyle('animated')
-        setSolidColor('#e8f5e9')
-        setGradientFrom('#ecfdf5')
-        setGradientVia('#d1fae5')
-        setGradientTo('#064e3b')
+        const saved = localStorage.getItem('tripfeels-theme-settings')
+        if (saved) {
+          const settings = JSON.parse(saved)
+          setLogoType(settings.logoType || 'text')
+          setTextLogo(settings.textLogo || 'tripfeels')
+          setLogoImage(settings.logoImage || null)
+          setColorTheme(settings.colorTheme || 'slate')
+          setBgStyle(settings.bgStyle || 'animated')
+          setSolidColor(settings.solidColor || '#e8f5e9')
+          setGradientFrom(settings.gradientFrom || '#ecfdf5')
+          setGradientVia(settings.gradientVia || '#d1fae5')
+          setGradientTo(settings.gradientTo || '#064e3b')
+        } else {
+          // defaults
+          setColorTheme('slate')
+          setLogoType('text')
+          setTextLogo('tripfeels')
+          setLogoImage(null)
+          setBgStyle('animated')
+          setSolidColor('#e8f5e9')
+          setGradientFrom('#ecfdf5')
+          setGradientVia('#d1fae5')
+          setGradientTo('#064e3b')
+        }
       }
     } catch (error) {
       console.error('Error loading theme settings:', error)
@@ -80,7 +94,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const saveThemeSettings = useCallback(() => {
+  const saveThemeSettings = useCallback(async () => {
     try {
       const settings = {
         logoType,
@@ -93,6 +107,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         gradientVia,
         gradientTo
       }
+      // Save to Firestore (global)
+      await saveTheme({
+        colorTheme,
+        bgStyle,
+        solidColor,
+        gradientFrom,
+        gradientVia,
+        gradientTo,
+      })
+      // Cache locally as well
       localStorage.setItem('tripfeels-theme-settings', JSON.stringify(settings))
     } catch (error) {
       console.error('Error saving theme settings:', error)
@@ -104,12 +128,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     loadThemeSettings()
   }, [loadThemeSettings])
 
-  // Auto-save theme settings when colorTheme changes
-  useEffect(() => {
-    if (colorTheme) {
-      saveThemeSettings()
-    }
-  }, [colorTheme, logoType, textLogo, logoImage, saveThemeSettings])
+  // Removed auto-save to prevent permission errors for non-admin users.
+  // Saving now occurs only via explicit calls (e.g., SuperAdmin action button).
 
   return (
     <ThemeContext.Provider

@@ -142,6 +142,28 @@ service cloud.firestore {
       allow write: if isAuthenticated(); // API handles admin authorization
     }
     
+    // Global Theme (public read, SuperAdmin write)
+    match /themes/{themeId} {
+      // Anyone can read the active theme (use isAuthenticated() instead if you prefer)
+      allow read: if true;
+
+      // Only SuperAdmin can create/update/delete and only allowed fields
+      allow create, update, delete: if isSuperAdmin() && validThemeWrite();
+
+      function validThemeWrite() {
+        // Allowed fields
+        let allowed = ['bgStyle', 'solidColor', 'gradientFrom', 'gradientVia', 'gradientTo', 'colorTheme', 'updatedAt', 'updatedBy'];
+        // Enforce allowed keys and basic type checks
+        return request.resource.data.keys().hasOnly(allowed)
+          && (request.resource.data.bgStyle in ['solid', 'gradient', 'animated'])
+          && (request.resource.data.colorTheme is string)
+          && (request.resource.data.solidColor is string)
+          && (request.resource.data.gradientFrom is string)
+          && (request.resource.data.gradientVia is string)
+          && (request.resource.data.gradientTo is string);
+      }
+    }
+    
     // Default deny rule for undefined collections
     match /{document=**} {
       allow read, write: if false;

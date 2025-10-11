@@ -51,9 +51,26 @@ export default function SuperAdminThemePage() {
     }
   }
 
-  const handleSave = () => {
-    saveThemeSettings()
-    // Show success message or toast
+  const handleSave = async () => {
+    try {
+      const res = await fetch('/api/theme', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bgStyle,
+          solidColor,
+          gradientFrom,
+          gradientVia,
+          gradientTo,
+          colorTheme,
+        })
+      })
+      if (!res.ok) throw new Error('Failed to save theme')
+      // Optionally rehydrate local cache by reloading or calling loadThemeSettings
+      // loadThemeSettings?.()
+    } catch (err) {
+      console.error('Save theme error:', err)
+    }
   }
 
   const handleColorThemeSelect = (theme: string) => {
