@@ -5,10 +5,27 @@ import { Header } from '@/components/layout/header'
 import { Sidebar } from '@/components/layout/sidebar'
 import { AuthSessionProvider } from '@/components/providers/session-provider'
 import { Footer } from '@/components/layout/footer'
+import { useTheme } from '@/contexts/theme-context'
+import { useMemo } from 'react'
 
 export function HomePageClient() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
+  const { bgStyle, solidColor, gradientFrom, gradientVia, gradientTo } = useTheme()
+
+  const wrapper = useMemo(() => {
+    if (bgStyle === 'solid') {
+      return {
+        className: 'min-h-screen',
+        style: { background: solidColor },
+      }
+    }
+    const gradient = `linear-gradient(135deg, ${gradientFrom} 0%, ${gradientVia} 50%, ${gradientTo} 100%)`
+    return {
+      className: `min-h-screen ${bgStyle === 'animated' ? 'animated-gradient' : ''}`.trim(),
+      style: { backgroundImage: gradient, backgroundSize: '200% 200%' },
+    }
+  }, [bgStyle, solidColor, gradientFrom, gradientVia, gradientTo])
 
   const toggleMobileSidebar = () => {
     setIsMobileSidebarOpen(!isMobileSidebarOpen)
@@ -20,7 +37,7 @@ export function HomePageClient() {
 
   return (
     <AuthSessionProvider>
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-green-100 to-green-800 dark:from-green-900 dark:via-green-800 dark:to-green-950 animated-gradient">
+      <div className={wrapper.className} style={wrapper.style}>
         {/* Animated background elements */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-32 w-80 h-80 bg-green-200/30 dark:bg-green-400/20 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>

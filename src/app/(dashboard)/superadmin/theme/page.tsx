@@ -13,7 +13,27 @@ import { useTheme } from '@/contexts/theme-context'
 import SlideshowManager from './SlideshowManager'
 
 export default function SuperAdminThemePage() {
-  const { logoType, textLogo, logoImage, colorTheme, setLogoType, setTextLogo, setLogoImage, setColorTheme, saveThemeSettings } = useTheme()
+  const {
+    logoType,
+    textLogo,
+    logoImage,
+    colorTheme,
+    bgStyle,
+    solidColor,
+    gradientFrom,
+    gradientVia,
+    gradientTo,
+    setLogoType,
+    setTextLogo,
+    setLogoImage,
+    setColorTheme,
+    setBgStyle,
+    setSolidColor,
+    setGradientFrom,
+    setGradientVia,
+    setGradientTo,
+    saveThemeSettings,
+  } = useTheme()
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
 
@@ -115,6 +135,86 @@ export default function SuperAdminThemePage() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Background Style Controls */}
+              <div className="space-y-4">
+                <Label className="text-base font-medium">Background Style</Label>
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                  <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer ${bgStyle === 'solid' ? 'border-emerald-500' : 'border-gray-200 dark:border-gray-700'}`}>
+                    <input
+                      type="radio"
+                      name="bgStyle"
+                      className="h-4 w-4"
+                      checked={bgStyle === 'solid'}
+                      onChange={() => setBgStyle('solid')}
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-200">Solid</span>
+                  </label>
+                  <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer ${bgStyle === 'gradient' ? 'border-emerald-500' : 'border-gray-200 dark:border-gray-700'}`}>
+                    <input
+                      type="radio"
+                      name="bgStyle"
+                      className="h-4 w-4"
+                      checked={bgStyle === 'gradient'}
+                      onChange={() => setBgStyle('gradient')}
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-200">Gradient</span>
+                  </label>
+                  <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer ${bgStyle === 'animated' ? 'border-emerald-500' : 'border-gray-200 dark:border-gray-700'}`}>
+                    <input
+                      type="radio"
+                      name="bgStyle"
+                      className="h-4 w-4"
+                      checked={bgStyle === 'animated'}
+                      onChange={() => setBgStyle('animated')}
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-200">Gradient (Animated)</span>
+                  </label>
+                </div>
+
+                {/* Solid Color Picker */}
+                {bgStyle === 'solid' && (
+                  <div className="flex items-center gap-4">
+                    <Label className="w-32">Solid Color</Label>
+                    <input
+                      type="color"
+                      value={solidColor}
+                      onChange={(e) => setSolidColor(e.target.value)}
+                      className="h-10 w-16 rounded border glass-border bg-transparent"
+                    />
+                    <Input
+                      type="text"
+                      value={solidColor}
+                      onChange={(e) => setSolidColor(e.target.value)}
+                      className="max-w-xs"
+                    />
+                  </div>
+                )}
+
+                {/* Gradient Color Pickers */}
+                {(bgStyle === 'gradient' || bgStyle === 'animated') && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-4">
+                      <Label className="w-32">From</Label>
+                      <input type="color" value={gradientFrom} onChange={(e) => setGradientFrom(e.target.value)} className="h-10 w-16 rounded border glass-border bg-transparent" />
+                      <Input type="text" value={gradientFrom} onChange={(e) => setGradientFrom(e.target.value)} className="max-w-xs" />
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Label className="w-32">Via</Label>
+                      <input type="color" value={gradientVia} onChange={(e) => setGradientVia(e.target.value)} className="h-10 w-16 rounded border glass-border bg-transparent" />
+                      <Input type="text" value={gradientVia} onChange={(e) => setGradientVia(e.target.value)} className="max-w-xs" />
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Label className="w-32">To</Label>
+                      <input type="color" value={gradientTo} onChange={(e) => setGradientTo(e.target.value)} className="h-10 w-16 rounded border glass-border bg-transparent" />
+                      <Input type="text" value={gradientTo} onChange={(e) => setGradientTo(e.target.value)} className="max-w-xs" />
+                    </div>
+                    <div className="mt-2 h-12 rounded-xl border glass-border" style={{
+                      backgroundImage: `linear-gradient(135deg, ${gradientFrom} 0%, ${gradientVia} 50%, ${gradientTo} 100%)`
+                    }} />
+                  </div>
+                )}
               </div>
 
               {/* Text Logo Configuration */}
@@ -358,19 +458,13 @@ export default function SuperAdminThemePage() {
                       </p>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Color Customization */}
-              <div className="space-y-4">
-                <Label className="text-base font-medium">Customize Colors</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Light Mode Colors */}
+                  {/* Background Style Controls */}
                   <div className="space-y-4">
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Light Mode</h4>
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Background Style</h4>
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
-                        <Label className="w-20 text-sm">Primary</Label>
+                        <Label className="w-20 text-sm">Background Style</Label>
                         <div className="flex-1 flex items-center gap-2">
                           <div className="w-8 h-8 bg-blue-600 rounded border"></div>
                           <Input type="text" value="#2563eb" className="flex-1" readOnly />

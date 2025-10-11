@@ -7,10 +7,20 @@ interface ThemeContextType {
   textLogo: string
   logoImage: string | null
   colorTheme: string
+  bgStyle: 'solid' | 'gradient' | 'animated'
+  solidColor: string
+  gradientFrom: string
+  gradientVia: string
+  gradientTo: string
   setLogoType: (type: 'text' | 'image') => void
   setTextLogo: (text: string) => void
   setLogoImage: (image: string | null) => void
   setColorTheme: (theme: string) => void
+  setBgStyle: (style: 'solid' | 'gradient' | 'animated') => void
+  setSolidColor: (hex: string) => void
+  setGradientFrom: (hex: string) => void
+  setGradientVia: (hex: string) => void
+  setGradientTo: (hex: string) => void
   saveThemeSettings: () => void
   loadThemeSettings: () => void
 }
@@ -22,6 +32,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [textLogo, setTextLogo] = useState('tripfeels')
   const [logoImage, setLogoImage] = useState<string | null>(null)
   const [colorTheme, setColorTheme] = useState('slate')
+  // Background controls
+  const [bgStyle, setBgStyle] = useState<'solid' | 'gradient' | 'animated'>('animated')
+  const [solidColor, setSolidColor] = useState<string>('#e8f5e9')
+  const [gradientFrom, setGradientFrom] = useState<string>('#ecfdf5')
+  const [gradientVia, setGradientVia] = useState<string>('#d1fae5')
+  const [gradientTo, setGradientTo] = useState<string>('#064e3b')
 
   const loadThemeSettings = useCallback(() => {
     try {
@@ -32,12 +48,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         setTextLogo(settings.textLogo || 'tripfeels')
         setLogoImage(settings.logoImage || null)
         setColorTheme(settings.colorTheme || 'slate')
+        setBgStyle(settings.bgStyle || 'animated')
+        setSolidColor(settings.solidColor || '#e8f5e9')
+        setGradientFrom(settings.gradientFrom || '#ecfdf5')
+        setGradientVia(settings.gradientVia || '#d1fae5')
+        setGradientTo(settings.gradientTo || '#064e3b')
       } else {
         // Set default theme for new users
         setColorTheme('slate')
         setLogoType('text')
         setTextLogo('tripfeels')
         setLogoImage(null)
+        setBgStyle('animated')
+        setSolidColor('#e8f5e9')
+        setGradientFrom('#ecfdf5')
+        setGradientVia('#d1fae5')
+        setGradientTo('#064e3b')
       }
     } catch (error) {
       console.error('Error loading theme settings:', error)
@@ -46,6 +72,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       setLogoType('text')
       setTextLogo('tripfeels')
       setLogoImage(null)
+      setBgStyle('animated')
+      setSolidColor('#e8f5e9')
+      setGradientFrom('#ecfdf5')
+      setGradientVia('#d1fae5')
+      setGradientTo('#064e3b')
     }
   }, [])
 
@@ -55,13 +86,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         logoType,
         textLogo,
         logoImage,
-        colorTheme
+        colorTheme,
+        bgStyle,
+        solidColor,
+        gradientFrom,
+        gradientVia,
+        gradientTo
       }
       localStorage.setItem('tripfeels-theme-settings', JSON.stringify(settings))
     } catch (error) {
       console.error('Error saving theme settings:', error)
     }
-  }, [logoType, textLogo, logoImage, colorTheme])
+  }, [logoType, textLogo, logoImage, colorTheme, bgStyle, solidColor, gradientFrom, gradientVia, gradientTo])
 
   // Load theme settings from localStorage on mount
   useEffect(() => {
@@ -82,10 +118,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         textLogo,
         logoImage,
         colorTheme,
+        bgStyle,
+        solidColor,
+        gradientFrom,
+        gradientVia,
+        gradientTo,
         setLogoType,
         setTextLogo,
         setLogoImage,
         setColorTheme,
+        setBgStyle,
+        setSolidColor,
+        setGradientFrom,
+        setGradientVia,
+        setGradientTo,
         saveThemeSettings,
         loadThemeSettings
       }}
