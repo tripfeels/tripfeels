@@ -103,6 +103,62 @@ export async function searchTravellers(
   }
 }
 
+// Paged travellers with DB-side pagination and proper total count
+export async function getTravellersPaged(
+  userRole: string,
+  userId: string,
+  params: {
+    search?: string
+    filters?: { ptc?: string; nationality?: string }
+    page: number
+    limit: number
+  }
+): Promise<{ rows: Traveller[]; total: number }> {
+  const { search, filters, page, limit } = params
+  const offset = Math.max(0, (page - 1) * limit)
+
+  const baseConditions: any[] = []
+  if (userRole !== 'SuperAdmin' && userRole !== 'Admin') {
+    baseConditions.push(eq(travellers.createdByUserId, userId))
+  }
+
+  if (search) {
+    baseConditions.push(
+      or(
+        like(travellers.givenName, `%${search}%`),
+        like(travellers.surname, `%${search}%`),
+        like(travellers.emailAddress, `%${search}%`),
+        like(travellers.documentId, `%${search}%`)
+      )!
+    )
+  }
+
+  if (filters?.ptc && filters.ptc !== 'All') {
+    baseConditions.push(eq(travellers.ptc, filters.ptc))
+  }
+  if (filters?.nationality && filters.nationality !== 'All') {
+    baseConditions.push(eq(travellers.nationality, filters.nationality))
+  }
+
+  const whereClause = baseConditions.length > 0 ? and(...baseConditions) : undefined
+
+  const rows = await db
+    .select()
+    .from(travellers)
+    .where(whereClause as any)
+    .orderBy(desc(travellers.createdAt))
+    .limit(limit)
+    .offset(offset)
+
+  const totalRes = await db
+    .select({ value: travellers.id })
+    .from(travellers)
+    .where(whereClause as any)
+
+  const total = totalRes.length
+  return { rows, total }
+}
+
 // Create new traveller
 export async function createTraveller(data: Omit<NewTraveller, 'id' | 'createdAt' | 'updatedAt'>) {
   const [traveller] = await db

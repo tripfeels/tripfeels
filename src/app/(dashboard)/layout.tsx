@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Sidebar } from '@/components/layout/sidebar'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
@@ -15,7 +15,16 @@ export default function DashboardLayout({
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
   const { bgStyle, solidColor, gradientFrom, gradientVia, gradientTo } = useTheme()
 
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const wrapper = useMemo(() => {
+    if (!mounted) {
+      return { className: 'min-h-screen', style: {} as React.CSSProperties }
+    }
     if (bgStyle === 'solid') {
       return {
         className: 'min-h-screen',
@@ -27,7 +36,21 @@ export default function DashboardLayout({
       className: `min-h-screen ${bgStyle === 'animated' ? 'animated-gradient' : ''}`.trim(),
       style: { backgroundImage: gradient, backgroundSize: '200% 200%' },
     }
-  }, [bgStyle, solidColor, gradientFrom, gradientVia, gradientTo])
+  }, [mounted, bgStyle, solidColor, gradientFrom, gradientVia, gradientTo])
+
+  const toRgba = (hex: string, alpha: number) => {
+    // supports #RRGGBB or rgb/rgba strings
+    if (!hex) return `rgba(0,0,0,${alpha})`
+    if (hex.startsWith('rgb')) {
+      return hex.replace(/rgba?\(([^)]+)\)/, (_m, inner) => `rgba(${inner.split(',').slice(0,3).join(',')}, ${alpha})`)
+    }
+    const h = hex.replace('#', '')
+    const bigint = parseInt(h, 16)
+    const r = (bigint >> 16) & 255
+    const g = (bigint >> 8) & 255
+    const b = bigint & 255
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+  }
 
   const toggleMobileSidebar = () => {
     setIsMobileSidebarOpen(!isMobileSidebarOpen)
@@ -40,11 +63,22 @@ export default function DashboardLayout({
   return (
     <div className={wrapper.className} style={wrapper.style}>
       {/* Animated background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-32 w-80 h-80 bg-green-200/30 dark:bg-green-400/20 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-green-400/30 dark:bg-green-600/20 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-green-300/30 dark:bg-green-500/20 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-4000"></div>
-      </div>
+      {mounted && (
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div
+            className="absolute -top-40 -right-32 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"
+            style={{ backgroundColor: toRgba(gradientFrom, 0.3) }}
+          />
+          <div
+            className="absolute -bottom-40 -left-32 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-2000"
+            style={{ backgroundColor: toRgba(gradientTo, 0.3) }}
+          />
+          <div
+            className="absolute top-40 left-40 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-4000"
+            style={{ backgroundColor: toRgba(gradientVia, 0.3) }}
+          />
+        </div>
+      )}
       
       <Header 
         showNavigation={false} 

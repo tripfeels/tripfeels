@@ -15,6 +15,9 @@ if (!firebaseAdminConfig.projectId || !firebaseAdminConfig.clientEmail || !fireb
     hasClientEmail: !!firebaseAdminConfig.clientEmail,
     hasPrivateKey: !!firebaseAdminConfig.privateKey,
   })
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Missing required Firebase Admin environment variables in production')
+  }
 }
 
 // Initialize Firebase Admin

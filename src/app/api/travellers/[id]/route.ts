@@ -2,12 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/nextauth'
 import { getTravellerById, updateTraveller, deleteTraveller } from '@/lib/db/travellers'
+import { rateLimiters } from '@/lib/middleware/rate-limit-middleware'
+import { z } from 'zod'
 
 // GET /api/travellers/[id] - Get traveller by ID
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  return rateLimiters.api(request, async (req: NextRequest) => {
   try {
     const session = await getServerSession(authOptions)
     
@@ -33,6 +36,7 @@ export async function GET(
       { status: 500 }
     )
   }
+  })
 }
 
 // PUT /api/travellers/[id] - Update traveller
@@ -40,6 +44,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  return rateLimiters.api(request, async (req: NextRequest) => {
   try {
     const session = await getServerSession(authOptions)
     
@@ -48,12 +53,36 @@ export async function PUT(
     }
 
     const body = await request.json()
+
+    const travellerUpdateSchema = z.object({
+      ptc: z.string().optional(),
+      givenName: z.string().min(1).optional(),
+      surname: z.string().min(1).optional(),
+      gender: z.string().optional(),
+      birthdate: z.union([z.string().min(1), z.null(), z.undefined()]).optional(),
+      nationality: z.string().max(3).nullable().optional(),
+      phoneNumber: z.string().min(1).optional(),
+      countryDialingCode: z.string().nullable().optional(),
+      emailAddress: z.string().email().nullable().optional(),
+      documentType: z.string().nullable().optional(),
+      documentId: z.string().nullable().optional(),
+      documentExpiryDate: z.union([z.string().min(1), z.null(), z.undefined()]).optional(),
+      ssrCodes: z.array(z.union([z.string(), z.object({ code: z.string(), remark: z.string().optional() })])).optional(),
+      loyaltyAirlineCode: z.string().nullable().optional(),
+      loyaltyAccountNumber: z.string().nullable().optional(),
+    })
+
+    const parsed = travellerUpdateSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid payload', details: parsed.error.flatten() }, { status: 400 })
+    }
+    const data = parsed.data
     
     // Process SSR codes - convert from objects to strings and create remarks object
-    const ssrCodes = (body.ssrCodes || []).map((ssr: any) => ssr.code || ssr)
+    const ssrCodes = (data.ssrCodes || []).map((ssr: any) => ssr.code || ssr)
     const ssrRemarks: Record<string, string> = {}
-    if (body.ssrCodes && Array.isArray(body.ssrCodes)) {
-      body.ssrCodes.forEach((ssr: any) => {
+    if (data.ssrCodes && Array.isArray(data.ssrCodes)) {
+      data.ssrCodes.forEach((ssr: any) => {
         if (ssr.code && ssr.remark) {
           ssrRemarks[ssr.code] = ssr.remark
         }
@@ -73,22 +102,22 @@ export async function PUT(
     const traveller = await updateTraveller(
       id,
       {
-        ptc: body.ptc,
-        givenName: body.givenName,
-        surname: body.surname,
-        gender: body.gender,
-        birthdate: processDateField(body.birthdate),
-        nationality: body.nationality,
-        phoneNumber: body.phoneNumber,
-        countryDialingCode: body.countryDialingCode,
-        emailAddress: body.emailAddress,
-        documentType: body.documentType,
-        documentId: body.documentId,
-        documentExpiryDate: processDateField(body.documentExpiryDate),
+        ptc: data.ptc,
+        givenName: data.givenName,
+        surname: data.surname,
+        gender: data.gender,
+        birthdate: processDateField(data.birthdate),
+        nationality: data.nationality as any,
+        phoneNumber: data.phoneNumber,
+        countryDialingCode: data.countryDialingCode as any,
+        emailAddress: data.emailAddress as any,
+        documentType: data.documentType as any,
+        documentId: data.documentId as any,
+        documentExpiryDate: processDateField(data.documentExpiryDate),
         ssrCodes: ssrCodes,
         ssrRemarks: ssrRemarks,
-        loyaltyAirlineCode: body.loyaltyAirlineCode,
-        loyaltyAccountNumber: body.loyaltyAccountNumber,
+        loyaltyAirlineCode: data.loyaltyAirlineCode as any,
+        loyaltyAccountNumber: data.loyaltyAccountNumber as any,
       },
       session.user.role,
       session.user.id
@@ -109,6 +138,7 @@ export async function PUT(
       { status: 500 }
     )
   }
+  })
 }
 
 // DELETE /api/travellers/[id] - Delete traveller (SuperAdmin only)
@@ -116,6 +146,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  return rateLimiters.api(request, async (req: NextRequest) => {
   try {
     const session = await getServerSession(authOptions)
     
@@ -141,4 +172,5 @@ export async function DELETE(
       { status: 500 }
     )
   }
+  })
 }

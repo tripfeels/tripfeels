@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, useLayoutEffect } from 'react'
 import { getTheme, saveTheme } from '@/lib/firebase/theme'
 
 interface ThemeContextType {
@@ -29,16 +29,28 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [logoType, setLogoType] = useState<'text' | 'image'>('text')
-  const [textLogo, setTextLogo] = useState('tripfeels')
-  const [logoImage, setLogoImage] = useState<string | null>(null)
-  const [colorTheme, setColorTheme] = useState('slate')
+  // Synchronous local initialization to prevent first-paint flash
+  const initialSettings = typeof window !== 'undefined'
+    ? (() => {
+        try {
+          const raw = localStorage.getItem('tripfeels-theme-settings')
+          return raw ? JSON.parse(raw) : null
+        } catch {
+          return null
+        }
+      })()
+    : null
+
+  const [logoType, setLogoType] = useState<'text' | 'image'>(initialSettings?.logoType || 'text')
+  const [textLogo, setTextLogo] = useState(initialSettings?.textLogo || 'tripfeels')
+  const [logoImage, setLogoImage] = useState<string | null>(initialSettings?.logoImage ?? null)
+  const [colorTheme, setColorTheme] = useState(initialSettings?.colorTheme || 'slate')
   // Background controls
-  const [bgStyle, setBgStyle] = useState<'solid' | 'gradient' | 'animated'>('animated')
-  const [solidColor, setSolidColor] = useState<string>('#e8f5e9')
-  const [gradientFrom, setGradientFrom] = useState<string>('#ecfdf5')
-  const [gradientVia, setGradientVia] = useState<string>('#d1fae5')
-  const [gradientTo, setGradientTo] = useState<string>('#064e3b')
+  const [bgStyle, setBgStyle] = useState<'solid' | 'gradient' | 'animated'>(initialSettings?.bgStyle || 'animated')
+  const [solidColor, setSolidColor] = useState<string>(initialSettings?.solidColor || '#e8f5e9')
+  const [gradientFrom, setGradientFrom] = useState<string>(initialSettings?.gradientFrom || '#ecfdf5')
+  const [gradientVia, setGradientVia] = useState<string>(initialSettings?.gradientVia || '#d1fae5')
+  const [gradientTo, setGradientTo] = useState<string>(initialSettings?.gradientTo || '#064e3b')
 
   const loadThemeSettings = useCallback(async () => {
     try {
@@ -123,8 +135,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [logoType, textLogo, logoImage, colorTheme, bgStyle, solidColor, gradientFrom, gradientVia, gradientTo])
 
-  // Load theme settings from localStorage on mount
-  useEffect(() => {
+  // Hydrate from remote/local as early as possible to minimize visual flash
+  useLayoutEffect(() => {
     loadThemeSettings()
   }, [loadThemeSettings])
 
