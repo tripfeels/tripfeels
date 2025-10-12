@@ -103,6 +103,7 @@ export const NAVIGATION_ITEMS = {
     { label: 'User Management', href: '/superadmin/admin/user-management', icon: 'Users' },
     { label: 'Travellers', href: '/superadmin/travellers', icon: 'UserCheck' },
     { label: 'Theme', href: '/superadmin/theme', icon: 'Palette' },
+    { label: 'Footer', href: '/superadmin/footer', icon: 'FileText' },
   ],
   [ROLES.ADMIN]: [
     { label: 'Dashboard', href: '/users/admin', icon: 'Home' },

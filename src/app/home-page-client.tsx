@@ -147,7 +147,7 @@ export function HomePageClient() {
         </div>
 
         {/* Fixed Footer matching dashboard style */}
-        <div className={`fixed bottom-0 left-0 right-0 transition-all duration-300 ${isSidebarCollapsed ? 'md:left-20' : 'md:left-64'}`}>
+        <div className={`fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 ${isSidebarCollapsed ? 'md:left-20' : 'md:left-64'}`}>
           <Footer />
         </div>
       </div>
