@@ -13,6 +13,8 @@ interface ThemeContextType {
   gradientFrom: string
   gradientVia: string
   gradientTo: string
+  solidContrast: string
+  isSolidDark: boolean
   setLogoType: (type: 'text' | 'image') => void
   setTextLogo: (text: string) => void
   setLogoImage: (image: string | null) => void
@@ -51,6 +53,38 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [gradientFrom, setGradientFrom] = useState<string>(initialSettings?.gradientFrom || '#ecfdf5')
   const [gradientVia, setGradientVia] = useState<string>(initialSettings?.gradientVia || '#d1fae5')
   const [gradientTo, setGradientTo] = useState<string>(initialSettings?.gradientTo || '#064e3b')
+
+  // Contrast calculation helpers
+  const parseHex = (hex: string) => {
+    const h = (hex || '').replace('#', '')
+    if (h.length === 3) {
+      const r = h[0]; const g = h[1]; const b = h[2]
+      return `#${r}${r}${g}${g}${b}${b}`
+    }
+    return `#${h.padEnd(6, '0').slice(0,6)}`
+  }
+  const hexToRgb = (hex: string) => {
+    const p = parseHex(hex).replace('#','')
+    const r = parseInt(p.slice(0,2), 16)
+    const g = parseInt(p.slice(2,4), 16)
+    const b = parseInt(p.slice(4,6), 16)
+    return { r, g, b }
+  }
+  const relLuminance = ({r,g,b}:{r:number,g:number,b:number}) => {
+    const srgb = [r,g,b].map(v => {
+      const c = v/255
+      return c <= 0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4)
+    })
+    return 0.2126*srgb[0] + 0.7152*srgb[1] + 0.0722*srgb[2]
+  }
+  const getContrastFor = (bg: string) => {
+    const L = relLuminance(hexToRgb(bg))
+    // If dark background (luminance < ~0.5), use light text, else dark text
+    return L < 0.5 ? '#F9FAFB' : '#0F172A'
+  }
+  const isDark = (bg: string) => relLuminance(hexToRgb(bg)) < 0.5
+  const solidContrast = getContrastFor(solidColor)
+  const isSolidDark = isDark(solidColor)
 
   const loadThemeSettings = useCallback(async () => {
     try {
@@ -140,6 +174,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     loadThemeSettings()
   }, [loadThemeSettings])
 
+  // Apply CSS variables for background and contrast so global UI can consume without prop drilling
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    const root = document.documentElement
+    root.style.setProperty('--tf-bg-solid', solidColor)
+    root.style.setProperty('--tf-bg-contrast', solidContrast)
+    root.classList.toggle('tf-solid-dark', isSolidDark)
+    // Mark when solid background mode is active so global CSS can apply contrast universally
+    root.classList.toggle('tf-bg-solid-mode', bgStyle === 'solid')
+  }, [solidColor, solidContrast, isSolidDark, bgStyle])
+
   // Removed auto-save to prevent permission errors for non-admin users.
   // Saving now occurs only via explicit calls (e.g., SuperAdmin action button).
 
@@ -155,6 +200,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         gradientFrom,
         gradientVia,
         gradientTo,
+        solidContrast,
+        isSolidDark,
         setLogoType,
         setTextLogo,
         setLogoImage,

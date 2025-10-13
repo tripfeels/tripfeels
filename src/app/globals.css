@@ -23,6 +23,9 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
+    /* Tripfeels theme variables injected by ThemeProvider */
+    --tf-bg-solid: #ffffff;
+    --tf-bg-contrast: #0f172a; /* Slate-900 default */
   }
 
   .dark {

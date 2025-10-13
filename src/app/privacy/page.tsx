@@ -7,6 +7,7 @@ import { Sidebar } from '@/components/layout/sidebar'
 import { Footer } from '@/components/layout/footer'
 import { useTheme } from '@/contexts/theme-context'
 import { AuthSessionProvider } from '@/components/providers/session-provider'
+import { Skeleton } from '@/components/ui/skeleton-loading'
 
 type FooterSettingsLS = {
   privacyContent?: string | null
@@ -164,7 +165,7 @@ export default function PrivacyPage() {
   const [ls, setLs] = useState<FooterSettingsLS | null>(null)
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
-  const { bgStyle, solidColor, gradientFrom, gradientVia, gradientTo } = useTheme()
+  const { bgStyle, solidColor, solidContrast, gradientFrom, gradientVia, gradientTo } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -184,7 +185,7 @@ export default function PrivacyPage() {
   const wrapper = useMemo(() => {
     if (!mounted) return { className: 'min-h-screen', style: {} as React.CSSProperties }
     if (bgStyle === 'solid') {
-      return { className: 'min-h-screen', style: { background: solidColor } }
+      return { className: 'min-h-screen', style: { background: solidColor, color: solidContrast } }
     }
     const gradient = `linear-gradient(135deg, ${gradientFrom} 0%, ${gradientVia} 50%, ${gradientTo} 100%)`
     return {
@@ -239,10 +240,12 @@ export default function PrivacyPage() {
                   <Link href="/" className="hover:underline">Home</Link> • Privacy Policy
                 </p>
                 {/* Decorative shapes */}
-                <div className="pointer-events-none absolute inset-0 -z-0">
-                  <div className="absolute -top-10 -left-10 w-40 h-40 rotate-45 rounded-lg" style={{ backgroundColor: toRgba(gradientFrom, 0.2) }} />
-                  <div className="absolute -bottom-10 right-10 w-44 h-44 -rotate-45 rounded-lg" style={{ backgroundColor: toRgba(gradientTo, 0.2) }} />
-                </div>
+                {mounted && (
+                  <div className="pointer-events-none absolute inset-0 -z-0">
+                    <div className="absolute -top-10 -left-10 w-40 h-40 rotate-45 rounded-lg" style={{ backgroundColor: toRgba(gradientFrom, 0.2) }} />
+                    <div className="absolute -bottom-10 right-10 w-44 h-44 -rotate-45 rounded-lg" style={{ backgroundColor: toRgba(gradientTo, 0.2) }} />
+                  </div>
+                )}
               </div>
 
               {/* Content grid */}
@@ -272,22 +275,33 @@ export default function PrivacyPage() {
                 {/* Right content */}
                 <section className="md:col-span-9">
                   <div className="bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/30 dark:border-white/20 rounded-xl p-6 md:p-8 shadow-lg">
-                    {(() => {
-                      const content = tab === 'en' ? english : bangla
-                      const parts = content.split('\n')
-                      const first = parts[0]?.trim() || ''
-                      const isTitle = first.length > 0 && (tab === 'en' ? /privacy policy/i.test(first) : /গোপনীয়তা|Privacy Policy/.test(first))
-                      const body = isTitle ? parts.slice(1).join('\n') : content
-                      const title = isTitle ? first : (tab === 'en' ? 'Privacy Policy' : 'গোপনীয়তা নীতি (Privacy Policy)')
-                      return (
-                        <>
-                          <h2 className="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-gray-100 mb-3">{title}</h2>
-                          <article className="whitespace-pre-wrap leading-7 text-[13.5px] md:text-[14px] text-gray-800 dark:text-gray-200">
-                            {body}
-                          </article>
-                        </>
-                      )
-                    })()}
+                    {!mounted ? (
+                      <>
+                        <Skeleton className="h-6 w-48 mb-4" />
+                        <div className="space-y-3">
+                          {[...Array(10)].map((_, i) => (
+                            <Skeleton key={i} className={`h-4 ${i % 3 === 0 ? 'w-5/6' : i % 3 === 1 ? 'w-4/6' : 'w-full'}`} />
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      (() => {
+                        const content = tab === 'en' ? english : bangla
+                        const parts = content.split('\n')
+                        const first = parts[0]?.trim() || ''
+                        const isTitle = first.length > 0 && (tab === 'en' ? /privacy policy/i.test(first) : /গোপনীয়তা|Privacy Policy/.test(first))
+                        const body = isTitle ? parts.slice(1).join('\n') : content
+                        const title = isTitle ? first : (tab === 'en' ? 'Privacy Policy' : 'গোপনীয়তা নীতি (Privacy Policy)')
+                        return (
+                          <>
+                            <h2 className="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-gray-100 mb-3">{title}</h2>
+                            <article className="whitespace-pre-wrap leading-7 text-[13.5px] md:text-[14px] text-gray-800 dark:text-gray-200">
+                              {body}
+                            </article>
+                          </>
+                        )
+                      })()
+                    )}
                   </div>
                 </section>
               </div>

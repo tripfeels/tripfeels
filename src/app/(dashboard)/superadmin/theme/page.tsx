@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { DynamicButton } from '@/components/ui/dynamic-theme-components'
 import { Input } from '@/components/ui/input'
@@ -36,6 +36,11 @@ export default function SuperAdminThemePage() {
   } = useTheme()
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -79,6 +84,15 @@ export default function SuperAdminThemePage() {
 
   const handlePreview = () => {
     window.open('/theme-demo', '_blank')
+  }
+
+  if (!mounted) {
+    return (
+      <div className="space-y-6 p-6">
+        <div className="h-7 w-48 rounded bg-gray-300 dark:bg-gray-700 animate-pulse" />
+        <div className="h-32 w-full rounded-lg bg-gray-200 dark:bg-gray-800 animate-pulse" />
+      </div>
+    )
   }
 
   return (

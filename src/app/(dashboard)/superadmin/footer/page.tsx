@@ -19,6 +19,16 @@ const schema = z.object({
   termsContent: z.string().nullable().optional(),
 })
 
+// Deep merge helper to preserve existing footer fields
+function mergeFooterSettings(existing: any, partial: any) {
+  const base = existing ?? {}
+  const next: any = { ...base, ...partial }
+  if (base.social || partial?.social) {
+    next.social = { ...(base.social ?? {}), ...(partial?.social ?? {}) }
+  }
+  return next
+}
+
 export default function SuperadminFooterPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -72,7 +82,100 @@ export default function SuperadminFooterPage() {
         privacyContent: form.privacyContent ?? null,
         termsContent: form.termsContent ?? null,
       })
-      localStorage.setItem('tripfeels-footer-settings', JSON.stringify(payload))
+      const prevRaw = localStorage.getItem('tripfeels-footer-settings')
+      const prev = prevRaw ? JSON.parse(prevRaw) : {}
+      const merged = mergeFooterSettings(prev, payload)
+      localStorage.setItem('tripfeels-footer-settings', JSON.stringify(merged))
+    } catch (e) {
+      console.error(e)
+      alert((e as Error).message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const onSaveFacebookOnly = async () => {
+    setSaving(true)
+    try {
+      const payload = schema.parse({
+        social: { facebook: form.social?.facebook || null },
+      })
+      const prevRaw = localStorage.getItem('tripfeels-footer-settings')
+      const prev = prevRaw ? JSON.parse(prevRaw) : {}
+      const merged = mergeFooterSettings(prev, payload)
+      localStorage.setItem('tripfeels-footer-settings', JSON.stringify(merged))
+    } catch (e) {
+      console.error(e)
+      alert((e as Error).message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const onSaveInstagramOnly = async () => {
+    setSaving(true)
+    try {
+      const payload = schema.parse({
+        social: { instagram: form.social?.instagram || null },
+      })
+      const prevRaw = localStorage.getItem('tripfeels-footer-settings')
+      const prev = prevRaw ? JSON.parse(prevRaw) : {}
+      const merged = mergeFooterSettings(prev, payload)
+      localStorage.setItem('tripfeels-footer-settings', JSON.stringify(merged))
+    } catch (e) {
+      console.error(e)
+      alert((e as Error).message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const onSaveCommunityOnly = async () => {
+    setSaving(true)
+    try {
+      const payload = schema.parse({
+        social: { community: form.social?.community || null },
+      })
+      const prevRaw = localStorage.getItem('tripfeels-footer-settings')
+      const prev = prevRaw ? JSON.parse(prevRaw) : {}
+      const merged = mergeFooterSettings(prev, payload)
+      localStorage.setItem('tripfeels-footer-settings', JSON.stringify(merged))
+    } catch (e) {
+      console.error(e)
+      alert((e as Error).message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const onSavePrivacyOnly = async () => {
+    setSaving(true)
+    try {
+      const payload = schema.parse({
+        privacyContent: form.privacyContent ?? null,
+      })
+      const prevRaw = localStorage.getItem('tripfeels-footer-settings')
+      const prev = prevRaw ? JSON.parse(prevRaw) : {}
+      const merged = mergeFooterSettings(prev, payload)
+      localStorage.setItem('tripfeels-footer-settings', JSON.stringify(merged))
+    } catch (e) {
+      console.error(e)
+      alert((e as Error).message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const onSaveTermsOnly = async () => {
+    setSaving(true)
+    try {
+      const payload = schema.parse({
+        termsContent: form.termsContent ?? null,
+      })
+      const prevRaw = localStorage.getItem('tripfeels-footer-settings')
+      const prev = prevRaw ? JSON.parse(prevRaw) : {}
+      const merged = mergeFooterSettings(prev, payload)
+      localStorage.setItem('tripfeels-footer-settings', JSON.stringify(merged))
     } catch (e) {
       console.error(e)
       alert((e as Error).message)
@@ -102,6 +205,11 @@ export default function SuperadminFooterPage() {
                 className="glass-input w-full"
                 placeholder="https://facebook.com/yourpage"
               />
+              <div className="mt-2">
+                <DynamicButton type="button" variant="secondary" disabled={disabled} onClick={onSaveFacebookOnly}>
+                  {saving ? 'Saving...' : 'Save Facebook only'}
+                </DynamicButton>
+              </div>
             </div>
             <div>
               <label className="block text-sm mb-1 text-gray-700 dark:text-gray-300">Instagram URL</label>
@@ -112,6 +220,11 @@ export default function SuperadminFooterPage() {
                 className="glass-input w-full"
                 placeholder="https://instagram.com/yourpage"
               />
+              <div className="mt-2">
+                <DynamicButton type="button" variant="secondary" disabled={disabled} onClick={onSaveInstagramOnly}>
+                  {saving ? 'Saving...' : 'Save Instagram only'}
+                </DynamicButton>
+              </div>
             </div>
             <div>
               <label className="block text-sm mb-1 text-gray-700 dark:text-gray-300">Community URL</label>
@@ -122,6 +235,11 @@ export default function SuperadminFooterPage() {
                 className="glass-input w-full"
                 placeholder="https://discord.gg/yourinvite"
               />
+              <div className="mt-2">
+                <DynamicButton type="button" variant="secondary" disabled={disabled} onClick={onSaveCommunityOnly}>
+                  {saving ? 'Saving...' : 'Save Community only'}
+                </DynamicButton>
+              </div>
             </div>
           </div>
 
@@ -135,6 +253,11 @@ export default function SuperadminFooterPage() {
                 className="glass-input w-full min-h-[160px]"
                 placeholder="Write your Privacy Policy content here"
               />
+              <div className="mt-2">
+                <DynamicButton type="button" variant="secondary" disabled={disabled} onClick={onSavePrivacyOnly}>
+                  {saving ? 'Saving...' : 'Save Privacy only'}
+                </DynamicButton>
+              </div>
             </div>
             <div>
               <label className="block text-sm mb-1 text-gray-700 dark:text-gray-300">Terms & Conditions</label>
@@ -144,6 +267,11 @@ export default function SuperadminFooterPage() {
                 className="glass-input w-full min-h-[160px]"
                 placeholder="Write your Terms & Conditions content here"
               />
+              <div className="mt-2">
+                <DynamicButton type="button" variant="secondary" disabled={disabled} onClick={onSaveTermsOnly}>
+                  {saving ? 'Saving...' : 'Save Terms only'}
+                </DynamicButton>
+              </div>
             </div>
           </div>
         </div>

@@ -132,10 +132,12 @@ export default function CookiesPage() {
                   <Link href="/" className="hover:underline">Home</Link> • Cookies Policy
                 </p>
                 {/* Decorative shapes */}
-                <div className="pointer-events-none absolute inset-0 -z-0">
-                  <div className="absolute -top-10 -left-10 w-40 h-40 rotate-45 rounded-lg" style={{ backgroundColor: toRgba(gradientFrom, 0.2) }} />
-                  <div className="absolute -bottom-10 right-10 w-44 h-44 -rotate-45 rounded-lg" style={{ backgroundColor: toRgba(gradientTo, 0.2) }} />
-                </div>
+                {mounted && (
+                  <div className="pointer-events-none absolute inset-0 -z-0">
+                    <div className="absolute -top-10 -left-10 w-40 h-40 rotate-45 rounded-lg" style={{ backgroundColor: toRgba(gradientFrom, 0.2) }} />
+                    <div className="absolute -bottom-10 right-10 w-44 h-44 -rotate-45 rounded-lg" style={{ backgroundColor: toRgba(gradientTo, 0.2) }} />
+                  </div>
+                )}
               </div>
 
               {/* Content grid */}
