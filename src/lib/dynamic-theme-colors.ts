@@ -5,9 +5,17 @@
 
 import { useState, useEffect } from 'react'
 import { useTheme } from '@/contexts/theme-context'
+import { useThemeSystem } from '@/components/theme-provider'
 
 // Theme color mappings
 export const themeColorMap = {
+  default: {
+    primary: 'bg-blue-600/90 dark:bg-blue-500/90',
+    primaryHover: 'hover:bg-blue-700/90 dark:hover:bg-blue-600/90',
+    primaryBorder: 'border-blue-500/40 dark:border-blue-400/40',
+    primaryText: 'text-blue-600 dark:text-blue-400',
+    primaryRing: 'focus:ring-blue-500/50',
+  },
   blue: {
     primary: 'bg-blue-600/90 dark:bg-blue-500/90',
     primaryHover: 'hover:bg-blue-700/90 dark:hover:bg-blue-600/90',
@@ -22,7 +30,14 @@ export const themeColorMap = {
     primaryText: 'text-rose-600 dark:text-rose-400',
     primaryRing: 'focus:ring-rose-500/50',
   },
-  emerald: {
+  red: {
+    primary: 'bg-red-600/90 dark:bg-red-500/90',
+    primaryHover: 'hover:bg-red-700/90 dark:hover:bg-red-600/90',
+    primaryBorder: 'border-red-500/40 dark:border-red-400/40',
+    primaryText: 'text-red-600 dark:text-red-400',
+    primaryRing: 'focus:ring-red-500/50',
+  },
+  green: {
     primary: 'bg-emerald-600/90 dark:bg-emerald-500/90',
     primaryHover: 'hover:bg-emerald-700/90 dark:hover:bg-emerald-600/90',
     primaryBorder: 'border-emerald-500/40 dark:border-emerald-400/40',
@@ -43,40 +58,26 @@ export const themeColorMap = {
     primaryText: 'text-orange-600 dark:text-orange-400',
     primaryRing: 'focus:ring-orange-500/50',
   },
-  gold: {
-    primary: 'bg-yellow-600/90 dark:bg-yellow-500/90',
-    primaryHover: 'hover:bg-yellow-700/90 dark:hover:bg-yellow-600/90',
+  yellow: {
+    primary: 'bg-yellow-500/90 dark:bg-yellow-400/90',
+    primaryHover: 'hover:bg-yellow-600/90 dark:hover:bg-yellow-500/90',
     primaryBorder: 'border-yellow-500/40 dark:border-yellow-400/40',
     primaryText: 'text-yellow-600 dark:text-yellow-400',
     primaryRing: 'focus:ring-yellow-500/50',
   },
-  purple: {
-    primary: 'bg-purple-600/90 dark:bg-purple-500/90',
-    primaryHover: 'hover:bg-purple-700/90 dark:hover:bg-purple-600/90',
-    primaryBorder: 'border-purple-500/40 dark:border-purple-400/40',
-    primaryText: 'text-purple-600 dark:text-purple-400',
-    primaryRing: 'focus:ring-purple-500/50',
+  teal: {
+    primary: 'bg-teal-600/90 dark:bg-teal-500/90',
+    primaryHover: 'hover:bg-teal-700/90 dark:hover:bg-teal-600/90',
+    primaryBorder: 'border-teal-500/40 dark:border-teal-400/40',
+    primaryText: 'text-teal-600 dark:text-teal-400',
+    primaryRing: 'focus:ring-teal-500/50',
   },
-  indigo: {
-    primary: 'bg-indigo-600/90 dark:bg-indigo-500/90',
-    primaryHover: 'hover:bg-indigo-700/90 dark:hover:bg-indigo-600/90',
-    primaryBorder: 'border-indigo-500/40 dark:border-indigo-400/40',
-    primaryText: 'text-indigo-600 dark:text-indigo-400',
-    primaryRing: 'focus:ring-indigo-500/50',
-  },
-  cyan: {
-    primary: 'bg-cyan-600/90 dark:bg-cyan-500/90',
-    primaryHover: 'hover:bg-cyan-700/90 dark:hover:bg-cyan-600/90',
-    primaryBorder: 'border-cyan-500/40 dark:border-cyan-400/40',
-    primaryText: 'text-cyan-600 dark:text-cyan-400',
-    primaryRing: 'focus:ring-cyan-500/50',
-  },
-  pink: {
-    primary: 'bg-pink-600/90 dark:bg-pink-500/90',
-    primaryHover: 'hover:bg-pink-700/90 dark:hover:bg-pink-600/90',
-    primaryBorder: 'border-pink-500/40 dark:border-pink-400/40',
-    primaryText: 'text-pink-600 dark:text-pink-400',
-    primaryRing: 'focus:ring-pink-500/50',
+  violet: {
+    primary: 'bg-violet-600/90 dark:bg-violet-500/90',
+    primaryHover: 'hover:bg-violet-700/90 dark:hover:bg-violet-600/90',
+    primaryBorder: 'border-violet-500/40 dark:border-violet-400/40',
+    primaryText: 'text-violet-600 dark:text-violet-400',
+    primaryRing: 'focus:ring-violet-500/50',
   },
 } as const
 
@@ -111,7 +112,21 @@ export function getThemeColors(themeName: string, isDarkMode: boolean = false) {
 
 // Hook to get dynamic theme colors
 export function useDynamicThemeColors() {
-  const { colorTheme } = useTheme()
+  // Prefer new theme system; fall back to legacy context
+  let themeName: string | undefined
+  try {
+    const sys = useThemeSystem()
+    themeName = sys.color
+  } catch {
+    // noop: provider might not be mounted in older pages
+  }
+  if (!themeName) {
+    try {
+      const legacy = useTheme()
+      themeName = legacy.colorTheme
+    } catch {}
+  }
+  const colorTheme = themeName || 'slate'
   
   // Get system theme (light/dark)
   const [isDarkMode, setIsDarkMode] = useState(false)

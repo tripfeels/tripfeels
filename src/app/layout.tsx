@@ -5,6 +5,7 @@ import { Analytics } from '@vercel/analytics/react'
 import { AuthSessionProvider } from '@/components/providers/session-provider'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { ThemeProvider as CustomThemeProvider } from '@/contexts/theme-context'
+import { ThemeSystemProvider } from '@/components/theme-provider'
 import { ErrorBoundary } from '@/components/error/ErrorBoundary'
 import { ErrorMonitoringProvider } from '@/components/providers/error-monitoring-provider'
 import './globals.css'
@@ -138,13 +139,15 @@ export default function RootLayout({
             defaultTheme="system"
             storageKey="tripfeels-theme"
           >
-            <CustomThemeProvider>
-              <AuthSessionProvider>
-                <ErrorMonitoringProvider>
-                  {children}
-                </ErrorMonitoringProvider>
-              </AuthSessionProvider>
-            </CustomThemeProvider>
+            <ThemeSystemProvider>
+              <CustomThemeProvider>
+                <AuthSessionProvider>
+                  <ErrorMonitoringProvider>
+                    {children}
+                  </ErrorMonitoringProvider>
+                </AuthSessionProvider>
+              </CustomThemeProvider>
+            </ThemeSystemProvider>
           </ThemeProvider>
         </ErrorBoundary>
         <Analytics />

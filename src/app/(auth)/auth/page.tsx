@@ -22,7 +22,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Header } from '@/components/layout/header'
 import { Sidebar } from '@/components/layout/sidebar'
 import { useSession } from 'next-auth/react'
-import { useTheme } from '@/contexts/theme-context'
 import { useMemo } from 'react'
 import AuthSlideshow from '@/components/auth/AuthSlideshow'
 
@@ -33,21 +32,13 @@ export default function AuthPage() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const router = useRouter()
   const { data: session } = useSession()
-  const { bgStyle, solidColor, gradientFrom, gradientVia, gradientTo } = useTheme()
 
   const wrapper = useMemo(() => {
-    if (bgStyle === 'solid') {
-      return {
-        className: 'min-h-screen',
-        style: { background: solidColor },
-      }
-    }
-    const gradient = `linear-gradient(135deg, ${gradientFrom} 0%, ${gradientVia} 50%, ${gradientTo} 100%)`
     return {
-      className: `min-h-screen ${bgStyle === 'animated' ? 'animated-gradient' : ''}`.trim(),
-      style: { backgroundImage: gradient, backgroundSize: '200% 200%' },
+      className: 'min-h-screen bg-white dark:bg-black',
+      style: {},
     }
-  }, [bgStyle, solidColor, gradientFrom, gradientVia, gradientTo])
+  }, [])
 
   const toggleMobileSidebar = () => {
     setIsMobileSidebarOpen(!isMobileSidebarOpen)
@@ -198,12 +189,7 @@ export default function AuthPage() {
 
   return (
     <div className={wrapper.className} style={wrapper.style}>
-      {/* Animated background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-32 w-80 h-80 bg-green-200/30 dark:bg-green-400/20 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-green-400/30 dark:bg-green-600/20 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-green-300/30 dark:bg-green-500/20 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-4000"></div>
-      </div>
+      {/* flat background for readability */}
 
       <Header 
         showNavigation={false} 

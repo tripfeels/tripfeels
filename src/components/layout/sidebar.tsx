@@ -81,7 +81,7 @@ export function Sidebar({ className, isMobile = false, onClose, onCollapseChange
       {/* Header */}
       <div className="flex items-center justify-between p-4">
         {shouldShowText && (
-          <h2 className="text-xl font-bold font-logo text-gray-900 dark:text-gray-100">
+          <h2 className="text-xl font-bold font-logo text-primary">
             {logoType === 'image' && logoImage ? (
               <img 
                 src={logoImage} 
@@ -105,7 +105,7 @@ export function Sidebar({ className, isMobile = false, onClose, onCollapseChange
               className="h-8 w-8 font-bold hover:bg-white/20 dark:hover:bg-white/10 border border-white/30 dark:border-white/20 bg-white/10 dark:bg-white/5 backdrop-blur-sm rounded-lg"
               aria-label="Close sidebar"
             >
-              <ChevronLeft className="h-4 w-4 font-bold text-gray-900 dark:text-gray-100" />
+              <ChevronLeft className="h-4 w-4 font-bold text-primary" />
             </Button>
           ) : (
             <Button
@@ -120,9 +120,9 @@ export function Sidebar({ className, isMobile = false, onClose, onCollapseChange
               aria-label={`${isCollapsed ? 'Expand' : 'Collapse'} sidebar`}
             >
               {isCollapsed ? (
-                <ChevronRight className="h-4 w-4 font-bold text-gray-900 dark:text-gray-100" />
+                <ChevronRight className="h-4 w-4 font-bold text-primary" />
               ) : (
-                <ChevronLeft className="h-4 w-4 font-bold text-gray-900 dark:text-gray-100" />
+                <ChevronLeft className="h-4 w-4 font-bold text-primary" />
               )}
             </Button>
           )}
@@ -144,13 +144,16 @@ export function Sidebar({ className, isMobile = false, onClose, onCollapseChange
               href={item.href}
               onClick={isMobile ? onClose : undefined}
               className={cn(
-                "flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 backdrop-blur-sm",
+                "group flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 backdrop-blur-sm",
                 isActive 
                   ? "bg-white/30 dark:bg-white/20 text-gray-900 dark:text-gray-100 border border-white/40 dark:border-white/30"
                   : "text-gray-600 dark:text-gray-400 hover:bg-white/20 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-gray-100"
               )}
             >
-              <Icon className="h-5 w-5 flex-shrink-0" />
+              <Icon className={cn(
+                "h-5 w-5 flex-shrink-0",
+                isActive ? "text-primary" : "text-primary/70 group-hover:text-primary"
+              )} />
               {shouldShowText && <span>{item.label}</span>}
             </Link>
           )

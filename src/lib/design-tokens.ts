@@ -41,7 +41,7 @@ export const glassmorphism = {
   interactive: {
     hover: 'hover:bg-white/25 dark:hover:bg-white/15',
     active: 'active:bg-white/35 dark:active:bg-white/25',
-    focus: 'focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2',
+    focus: 'focus:ring-2 focus:ring-primary/50 focus:ring-offset-2',
   },
 }
 
@@ -136,7 +136,7 @@ export const backgroundElements = {
 export const components = {
   // Button variants using the design system (static - use DynamicButton for theme-aware buttons)
   button: {
-    primary: `${colors.brand.primary} ${colors.brand.primaryHover} ${glassmorphism.blur.sm} text-white ${colors.brand.primaryBorder} shadow-lg rounded-lg ${animations.smooth}`,
+    primary: `bg-primary hover:bg-primary/90 ${glassmorphism.blur.sm} text-primary-foreground border border-primary/40 shadow-lg rounded-lg ${animations.smooth}`,
     secondary: `${colors.brand.secondary} ${colors.brand.secondaryHover} ${glassmorphism.blur.sm} text-white ${colors.brand.secondaryBorder} shadow-lg rounded-lg ${animations.smooth}`,
     ghost: `${glassmorphism.background.default} ${glassmorphism.border.default} ${glassmorphism.blur.sm} ${colors.text.primary} ${glassmorphism.interactive.hover} ${animations.smooth} rounded-lg`,
     outline: `${glassmorphism.background.subtle} ${glassmorphism.border.default} ${glassmorphism.blur.sm} ${colors.text.primary} ${glassmorphism.interactive.hover} ${animations.smooth} rounded-lg`,
@@ -147,8 +147,8 @@ export const components = {
   
   // Input variants
   input: {
-    default: `${glassmorphism.background.default} ${glassmorphism.border.default} ${glassmorphism.blur.sm} ${colors.text.primary} placeholder-gray-500 dark:placeholder-gray-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2`,
-    subtle: `${glassmorphism.background.subtle} ${glassmorphism.border.subtle} ${glassmorphism.blur.sm} ${colors.text.primary} placeholder-gray-500 dark:placeholder-gray-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2`,
+    default: `${glassmorphism.background.default} ${glassmorphism.border.default} ${glassmorphism.blur.sm} ${colors.text.primary} placeholder-gray-500 dark:placeholder-gray-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2`,
+    subtle: `${glassmorphism.background.subtle} ${glassmorphism.border.subtle} ${glassmorphism.blur.sm} ${colors.text.primary} placeholder-gray-500 dark:placeholder-gray-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2`,
   },
   
   // Card variants

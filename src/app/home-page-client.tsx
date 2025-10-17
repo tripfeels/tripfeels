@@ -5,12 +5,10 @@ import { Header } from '@/components/layout/header'
 import { Sidebar } from '@/components/layout/sidebar'
 import { AuthSessionProvider } from '@/components/providers/session-provider'
 import { Footer } from '@/components/layout/footer'
-import { useTheme } from '@/contexts/theme-context'
 
 export function HomePageClient() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
-  const { bgStyle, solidColor, gradientFrom, gradientVia, gradientTo } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -18,34 +16,14 @@ export function HomePageClient() {
   }, [])
 
   const wrapper = useMemo(() => {
-    if (!mounted) {
-      return { className: 'min-h-screen', style: {} as React.CSSProperties }
-    }
-    if (bgStyle === 'solid') {
-      return {
-        className: 'min-h-screen',
-        style: { background: solidColor },
-      }
-    }
-    const gradient = `linear-gradient(135deg, ${gradientFrom} 0%, ${gradientVia} 50%, ${gradientTo} 100%)`
+    if (!mounted) return { className: 'min-h-screen bg-white dark:bg-black', style: {} as React.CSSProperties }
     return {
-      className: `min-h-screen ${bgStyle === 'animated' ? 'animated-gradient' : ''}`.trim(),
-      style: { backgroundImage: gradient, backgroundSize: '200% 200%' },
+      className: 'min-h-screen bg-white dark:bg-black',
+      style: {},
     }
-  }, [mounted, bgStyle, solidColor, gradientFrom, gradientVia, gradientTo])
+  }, [mounted])
 
-  const toRgba = (hex: string, alpha: number) => {
-    if (!hex) return `rgba(0,0,0,${alpha})`
-    if (hex.startsWith('rgb')) {
-      return hex.replace(/rgba?\(([^)]+)\)/, (_m, inner) => `rgba(${inner.split(',').slice(0,3).join(',')}, ${alpha})`)
-    }
-    const h = hex.replace('#', '')
-    const bigint = parseInt(h, 16)
-    const r = (bigint >> 16) & 255
-    const g = (bigint >> 8) & 255
-    const b = bigint & 255
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`
-  }
+  // Blob colors from theme vars
 
   const toggleMobileSidebar = () => {
     setIsMobileSidebarOpen(!isMobileSidebarOpen)
@@ -59,22 +37,7 @@ export function HomePageClient() {
     <AuthSessionProvider>
       <div className={wrapper.className} style={wrapper.style}>
         {/* Animated background elements */}
-        {mounted && (
-          <div className="fixed inset-0 overflow-hidden pointer-events-none">
-            <div
-              className="absolute -top-40 -right-32 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"
-              style={{ backgroundColor: toRgba(gradientFrom, 0.3) }}
-            />
-            <div
-              className="absolute -bottom-40 -left-32 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-2000"
-              style={{ backgroundColor: toRgba(gradientTo, 0.3) }}
-            />
-            <div
-              className="absolute top-40 left-40 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-4000"
-              style={{ backgroundColor: toRgba(gradientVia, 0.3) }}
-            />
-          </div>
-        )}
+        {/* flat background for readability */}
         
         <Header 
           showNavigation={false} 

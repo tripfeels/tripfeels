@@ -102,7 +102,7 @@ export const NAVIGATION_ITEMS = {
     { label: 'Dashboard', href: '/superadmin/admin', icon: 'Home' },
     { label: 'User Management', href: '/superadmin/admin/user-management', icon: 'Users' },
     { label: 'Travellers', href: '/superadmin/travellers', icon: 'UserCheck' },
-    { label: 'Theme', href: '/superadmin/theme', icon: 'Palette' },
+    { label: 'Appearance', href: '/superadmin/theme', icon: 'Palette' },
     { label: 'Footer', href: '/superadmin/footer', icon: 'FileText' },
   ],
   [ROLES.ADMIN]: [

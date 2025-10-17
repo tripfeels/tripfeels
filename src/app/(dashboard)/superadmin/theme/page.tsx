@@ -10,6 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Upload, Type, Image, Save, Eye, Plus, Trash2 } from 'lucide-react'
 import { addSlide, deleteSlide, listSlides } from '@/lib/firebase/slides'
 import { useTheme } from '@/contexts/theme-context'
+import { useThemeSystem } from '@/components/theme-provider'
+import ThemeSelector from '@/components/theme-selector'
 import SlideshowManager from './SlideshowManager'
 
 export default function SuperAdminThemePage() {
@@ -17,23 +19,11 @@ export default function SuperAdminThemePage() {
     logoType,
     textLogo,
     logoImage,
-    colorTheme,
-    bgStyle,
-    solidColor,
-    gradientFrom,
-    gradientVia,
-    gradientTo,
     setLogoType,
     setTextLogo,
     setLogoImage,
-    setColorTheme,
-    setBgStyle,
-    setSolidColor,
-    setGradientFrom,
-    setGradientVia,
-    setGradientTo,
-    saveThemeSettings,
   } = useTheme()
+  const { color, mode, setColor, setMode } = useThemeSystem()
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
@@ -62,12 +52,8 @@ export default function SuperAdminThemePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          bgStyle,
-          solidColor,
-          gradientFrom,
-          gradientVia,
-          gradientTo,
-          colorTheme,
+          colorTheme: color,
+          mode,
         })
       })
       if (!res.ok) throw new Error('Failed to save theme')
@@ -76,10 +62,6 @@ export default function SuperAdminThemePage() {
     } catch (err) {
       console.error('Save theme error:', err)
     }
-  }
-
-  const handleColorThemeSelect = (theme: string) => {
-    setColorTheme(theme)
   }
 
   const handlePreview = () => {
@@ -107,7 +89,7 @@ export default function SuperAdminThemePage() {
       <Tabs defaultValue="logo" className="space-y-6">
         <TabsList className="!flex !w-full !flex-wrap !gap-1 !h-auto !p-2 glass-tabs">
           <TabsTrigger value="logo" className="!text-xs md:!text-sm !flex-1 !min-w-[calc(50%-0.125rem)] md:!min-w-0 !px-2 !py-2">Logo Settings</TabsTrigger>
-          <TabsTrigger value="colors" className="!text-xs md:!text-sm !flex-1 !min-w-[calc(50%-0.125rem)] md:!min-w-0 !px-2 !py-2">Color Scheme</TabsTrigger>
+          <TabsTrigger value="colors" className="!text-xs md:!text-sm !flex-1 !min-w-[calc(50%-0.125rem)] md:!min-w-0 !px-2 !py-2">Appearance</TabsTrigger>
           <TabsTrigger value="slideshow" className="!text-xs md:!text-sm !flex-1 !min-w-[calc(50%-0.125rem)] md:!min-w-0 !px-2 !py-2">Slideshow</TabsTrigger>
           <TabsTrigger value="preview" className="!text-xs md:!text-sm !flex-1 !min-w-[calc(50%-0.125rem)] md:!min-w-0 !px-2 !py-2">Preview</TabsTrigger>
         </TabsList>
@@ -131,7 +113,7 @@ export default function SuperAdminThemePage() {
                   <div
                     className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
                       logoType === 'text'
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                        ? 'border-primary bg-primary/10 dark:bg-primary/20'
                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                     }`}
                     onClick={() => setLogoType('text')}
@@ -150,7 +132,7 @@ export default function SuperAdminThemePage() {
                   <div
                     className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
                       logoType === 'image'
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                        ? 'border-primary bg-primary/10 dark:bg-primary/20'
                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                     }`}
                     onClick={() => setLogoType('image')}
@@ -168,85 +150,7 @@ export default function SuperAdminThemePage() {
                 </div>
               </div>
 
-              {/* Background Style Controls */}
-              <div className="space-y-4">
-                <Label className="text-base font-medium">Background Style</Label>
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                  <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer ${bgStyle === 'solid' ? 'border-emerald-500' : 'border-gray-200 dark:border-gray-700'}`}>
-                    <input
-                      type="radio"
-                      name="bgStyle"
-                      className="h-4 w-4"
-                      checked={bgStyle === 'solid'}
-                      onChange={() => setBgStyle('solid')}
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-200">Solid</span>
-                  </label>
-                  <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer ${bgStyle === 'gradient' ? 'border-emerald-500' : 'border-gray-200 dark:border-gray-700'}`}>
-                    <input
-                      type="radio"
-                      name="bgStyle"
-                      className="h-4 w-4"
-                      checked={bgStyle === 'gradient'}
-                      onChange={() => setBgStyle('gradient')}
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-200">Gradient</span>
-                  </label>
-                  <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer ${bgStyle === 'animated' ? 'border-emerald-500' : 'border-gray-200 dark:border-gray-700'}`}>
-                    <input
-                      type="radio"
-                      name="bgStyle"
-                      className="h-4 w-4"
-                      checked={bgStyle === 'animated'}
-                      onChange={() => setBgStyle('animated')}
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-200">Gradient (Animated)</span>
-                  </label>
-                </div>
-
-                {/* Solid Color Picker */}
-                {bgStyle === 'solid' && (
-                  <div className="flex items-center gap-4">
-                    <Label className="w-32">Solid Color</Label>
-                    <input
-                      type="color"
-                      value={solidColor}
-                      onChange={(e) => setSolidColor(e.target.value)}
-                      className="h-10 w-16 rounded border glass-border bg-transparent"
-                    />
-                    <Input
-                      type="text"
-                      value={solidColor}
-                      onChange={(e) => setSolidColor(e.target.value)}
-                      className="max-w-xs"
-                    />
-                  </div>
-                )}
-
-                {/* Gradient Color Pickers */}
-                {(bgStyle === 'gradient' || bgStyle === 'animated') && (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-4">
-                      <Label className="w-32">From</Label>
-                      <input type="color" value={gradientFrom} onChange={(e) => setGradientFrom(e.target.value)} className="h-10 w-16 rounded border glass-border bg-transparent" />
-                      <Input type="text" value={gradientFrom} onChange={(e) => setGradientFrom(e.target.value)} className="max-w-xs" />
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <Label className="w-32">Via</Label>
-                      <input type="color" value={gradientVia} onChange={(e) => setGradientVia(e.target.value)} className="h-10 w-16 rounded border glass-border bg-transparent" />
-                      <Input type="text" value={gradientVia} onChange={(e) => setGradientVia(e.target.value)} className="max-w-xs" />
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <Label className="w-32">To</Label>
-                      <input type="color" value={gradientTo} onChange={(e) => setGradientTo(e.target.value)} className="h-10 w-16 rounded border glass-border bg-transparent" />
-                      <Input type="text" value={gradientTo} onChange={(e) => setGradientTo(e.target.value)} className="max-w-xs" />
-                    </div>
-                    <div className="mt-2 h-12 rounded-xl border glass-border" style={{
-                      backgroundImage: `linear-gradient(135deg, ${gradientFrom} 0%, ${gradientVia} 50%, ${gradientTo} 100%)`
-                    }} />
-                  </div>
-                )}
-              </div>
+              {/* Background controls removed – background follows selected theme automatically */}
 
               {/* Text Logo Configuration */}
               {logoType === 'text' && (
@@ -293,7 +197,7 @@ export default function SuperAdminThemePage() {
                         type="file"
                         accept=".svg"
                         onChange={handleFileUpload}
-                        className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
                       />
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -342,223 +246,23 @@ export default function SuperAdminThemePage() {
         <TabsContent value="colors" className="space-y-6">
           <div className="glass-card">
             <div className="p-6 border-b glass-border">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Color Scheme</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Choose from predefined color themes that work in both light and dark modes
-              </p>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Appearance</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Select a theme name and mode. Background colors adjust automatically.</p>
             </div>
             <div className="p-6 space-y-6">
-              {/* Color Theme Selection */}
-              <div className="space-y-4">
-                <Label className="text-base font-medium">Select Color Theme</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {/* Rose Theme */}
-                  <div 
-                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      colorTheme === 'rose'
-                        ? 'border-rose-500 bg-rose-50 dark:bg-rose-900/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-rose-300 dark:hover:border-rose-600'
-                    }`}
-                    onClick={() => handleColorThemeSelect('rose')}
-                  >
-                    <div className="space-y-3">
-                      <h3 className="font-medium text-gray-900 dark:text-gray-100">Rose</h3>
-                      <div className="flex gap-1">
-                        <div className="w-8 h-8 bg-rose-50 rounded border"></div>
-                        <div className="w-8 h-8 bg-rose-300 rounded border"></div>
-                        <div className="w-8 h-8 bg-rose-600 rounded border"></div>
-                        <div className="w-8 h-8 bg-rose-900 rounded border"></div>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Elegant rose tones for a sophisticated look
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Emerald Theme */}
-                  <div 
-                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      colorTheme === 'emerald'
-                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600'
-                    }`}
-                    onClick={() => handleColorThemeSelect('emerald')}
-                  >
-                    <div className="space-y-3">
-                      <h3 className="font-medium text-gray-900 dark:text-gray-100">Emerald</h3>
-                      <div className="flex gap-1">
-                        <div className="w-8 h-8 bg-emerald-50 rounded border"></div>
-                        <div className="w-8 h-8 bg-emerald-300 rounded border"></div>
-                        <div className="w-8 h-8 bg-emerald-600 rounded border"></div>
-                        <div className="w-8 h-8 bg-emerald-900 rounded border"></div>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Fresh emerald greens for a natural feel
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Slate Theme */}
-                  <div 
-                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      colorTheme === 'slate'
-                        ? 'border-slate-500 bg-slate-50 dark:bg-slate-900/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-slate-300 dark:hover:border-slate-600'
-                    }`}
-                    onClick={() => handleColorThemeSelect('slate')}
-                  >
-                    <div className="space-y-3">
-                      <h3 className="font-medium text-gray-900 dark:text-gray-100">Slate</h3>
-                      <div className="flex gap-1">
-                        <div className="w-8 h-8 bg-slate-50 rounded border"></div>
-                        <div className="w-8 h-8 bg-slate-300 rounded border"></div>
-                        <div className="w-8 h-8 bg-slate-600 rounded border"></div>
-                        <div className="w-8 h-8 bg-slate-900 rounded border"></div>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Professional slate grays for business use
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Orange Theme */}
-                  <div 
-                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      colorTheme === 'orange'
-                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600'
-                    }`}
-                    onClick={() => handleColorThemeSelect('orange')}
-                  >
-                    <div className="space-y-3">
-                      <h3 className="font-medium text-gray-900 dark:text-gray-100">Orange</h3>
-                      <div className="flex gap-1">
-                        <div className="w-8 h-8 bg-orange-50 rounded border"></div>
-                        <div className="w-8 h-8 bg-orange-300 rounded border"></div>
-                        <div className="w-8 h-8 bg-orange-600 rounded border"></div>
-                        <div className="w-8 h-8 bg-orange-900 rounded border"></div>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Vibrant orange for energy and creativity
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Blue Theme */}
-                  <div 
-                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      colorTheme === 'blue'
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600'
-                    }`}
-                    onClick={() => handleColorThemeSelect('blue')}
-                  >
-                    <div className="space-y-3">
-                      <h3 className="font-medium text-gray-900 dark:text-gray-100">Blue</h3>
-                      <div className="flex gap-1">
-                        <div className="w-8 h-8 bg-blue-50 rounded border"></div>
-                        <div className="w-8 h-8 bg-blue-300 rounded border"></div>
-                        <div className="w-8 h-8 bg-blue-600 rounded border"></div>
-                        <div className="w-8 h-8 bg-blue-900 rounded border"></div>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Trustworthy blue for reliability
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Gold Theme */}
-                  <div 
-                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      colorTheme === 'gold'
-                        ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-yellow-300 dark:hover:border-yellow-600'
-                    }`}
-                    onClick={() => handleColorThemeSelect('gold')}
-                  >
-                    <div className="space-y-3">
-                      <h3 className="font-medium text-gray-900 dark:text-gray-100">Gold</h3>
-                      <div className="flex gap-1">
-                        <div className="w-8 h-8 bg-yellow-50 rounded border"></div>
-                        <div className="w-8 h-8 bg-yellow-300 rounded border"></div>
-                        <div className="w-8 h-8 bg-yellow-600 rounded border"></div>
-                        <div className="w-8 h-8 bg-yellow-900 rounded border"></div>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Luxurious gold for premium branding
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Background Style Controls */}
-                  <div className="space-y-4">
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Background Style</h4>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <Label className="w-20 text-sm">Background Style</Label>
-                        <div className="flex-1 flex items-center gap-2">
-                          <div className="w-8 h-8 bg-blue-600 rounded border"></div>
-                          <Input type="text" value="#2563eb" className="flex-1" readOnly />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Label className="w-20 text-sm">Secondary</Label>
-                        <div className="flex-1 flex items-center gap-2">
-                          <div className="w-8 h-8 bg-gray-100 rounded border"></div>
-                          <Input type="text" value="#f3f4f6" className="flex-1" readOnly />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Label className="w-20 text-sm">Accent</Label>
-                        <div className="flex-1 flex items-center gap-2">
-                          <div className="w-8 h-8 bg-blue-100 rounded border"></div>
-                          <Input type="text" value="#dbeafe" className="flex-1" readOnly />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Dark Mode Colors */}
-                  <div className="space-y-4">
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Dark Mode</h4>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <Label className="w-20 text-sm">Primary</Label>
-                        <div className="flex-1 flex items-center gap-2">
-                          <div className="w-8 h-8 bg-blue-400 rounded border"></div>
-                          <Input type="text" value="#60a5fa" className="flex-1" readOnly />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Label className="w-20 text-sm">Secondary</Label>
-                        <div className="flex-1 flex items-center gap-2">
-                          <div className="w-8 h-8 bg-gray-800 rounded border"></div>
-                          <Input type="text" value="#1f2937" className="flex-1" readOnly />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Label className="w-20 text-sm">Accent</Label>
-                        <div className="flex-1 flex items-center gap-2">
-                          <div className="w-8 h-8 bg-gray-700 rounded border"></div>
-                          <Input type="text" value="#374151" className="flex-1" readOnly />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap gap-3 pt-4">
-                <DynamicButton variant="primary" onClick={handleSave} className="flex items-center gap-2 flex-1 min-w-[calc(50%-0.375rem)] sm:flex-none sm:min-w-0">
-                  <Save className="h-4 w-4" />
-                  Apply Theme
-                </DynamicButton>
-                <DynamicButton variant="outline" onClick={handlePreview} className="flex items-center gap-2 flex-1 min-w-[calc(50%-0.375rem)] sm:flex-none sm:min-w-0">
-                  <Eye className="h-4 w-4" />
-                  Preview Changes
-                </DynamicButton>
-              </div>
+              <ThemeSelector />
+            </div>
+          
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-3 pt-4">
+              <DynamicButton variant="primary" onClick={handleSave} className="flex items-center gap-2 flex-1 min-w-[calc(50%-0.375rem)] sm:flex-none sm:min-w-0">
+                <Save className="h-4 w-4" />
+                Apply Theme
+              </DynamicButton>
+              <DynamicButton variant="outline" onClick={handlePreview} className="flex items-center gap-2 flex-1 min-w-[calc(50%-0.375rem)] sm:flex-none sm:min-w-0">
+                <Eye className="h-4 w-4" />
+                Preview Changes
+              </DynamicButton>
             </div>
           </div>
         </TabsContent>

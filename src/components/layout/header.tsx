@@ -117,7 +117,7 @@ export function Header({ className, showNavigation = true, showUserActions = tru
           </Button>
           
           {/* Logo Section */}
-          <Link href="/" className={cn("text-lg font-semibold font-logo text-gray-900 dark:text-gray-100 hover:text-gray-600 dark:hover:text-gray-400", animations.transition)}>
+          <Link href="/" className={cn("text-lg font-semibold font-logo text-primary", animations.transition)}>
             {logoType === 'image' && logoImage ? (
               <img 
                 src={logoImage} 
@@ -147,11 +147,11 @@ export function Header({ className, showNavigation = true, showUserActions = tru
               aria-label={`Switch to ${theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light'} theme`}
             >
               {theme === 'light' ? (
-                <Sun className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+                <Sun className="h-4 w-4 text-primary" />
               ) : theme === 'dark' ? (
-                <Moon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+                <Moon className="h-4 w-4 text-primary" />
               ) : (
-                <Monitor className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+                <Monitor className="h-4 w-4 text-primary" />
               )}
             </Button>
           </div>

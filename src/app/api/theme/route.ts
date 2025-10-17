@@ -22,43 +22,22 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const {
-      bgStyle,
-      solidColor,
-      gradientFrom,
-      gradientVia,
-      gradientTo,
-      colorTheme,
-    } = body || {}
+    const { colorTheme, mode } = body || {}
 
-    if (!['solid', 'gradient', 'animated'].includes(bgStyle)) {
-      return NextResponse.json({ error: 'Invalid bgStyle' }, { status: 400 })
-    }
-
-    if (bgStyle === 'solid' && !isValidHex(solidColor)) {
-      return NextResponse.json({ error: 'Invalid solidColor' }, { status: 400 })
-    }
-
-    if ((bgStyle === 'gradient' || bgStyle === 'animated')) {
-      if (!isValidHex(gradientFrom) || !isValidHex(gradientVia) || !isValidHex(gradientTo)) {
-        return NextResponse.json({ error: 'Invalid gradient colors' }, { status: 400 })
-      }
-    }
+    const allowed = ['default','red','rose','orange','yellow','green','blue','violet','teal','slate']
+    const themeName = typeof colorTheme === 'string' && allowed.includes(colorTheme) ? colorTheme : 'slate'
+    const themeMode = mode === 'dark' ? 'dark' : 'light'
 
     const payload = {
-      bgStyle,
-      solidColor,
-      gradientFrom,
-      gradientVia,
-      gradientTo,
-      colorTheme: typeof colorTheme === 'string' ? colorTheme : 'slate',
+      colorTheme: themeName,
+      mode: themeMode,
       updatedAt: new Date(),
-      updatedBy: session.user.id,
+      updatedBy: (session.user as any).id,
     }
 
     await adminDb.collection('themes').doc('global').set(payload, { merge: true })
 
-    return NextResponse.json({ ok: true })
+    return NextResponse.json({ ok: true, theme: payload })
   } catch (error: any) {
     console.error('POST /api/theme error:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

@@ -115,7 +115,7 @@ export function TravellersList({
           <button
             onClick={onRefresh}
             disabled={isLoading}
-            className="p-2 rounded-lg bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/30 transition-colors duration-200 disabled:opacity-50"
+            className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors duration-200 disabled:opacity-50"
             title="Refresh travellers data"
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -123,7 +123,8 @@ export function TravellersList({
         </div>
         <Button
           onClick={onAddTraveller}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+          variant="default"
+          className="px-4 py-2 flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
           Add Traveller
@@ -141,7 +142,7 @@ export function TravellersList({
           <Input
             type="text"
             placeholder="Search by name, email, or document ID"
-            className="pl-10 h-9 w-full rounded-lg border border-white/30 bg-white/20 backdrop-blur-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+            className="pl-10 h-9 w-full rounded-lg border border-[hsl(var(--primary))]/60 bg-primary/10 backdrop-blur-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -198,15 +199,15 @@ export function TravellersList({
                   {/* Traveller Info */}
                   <div className="flex-1 space-y-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center">
-                        <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      <div className="w-10 h-10 bg-primary/15 rounded-full flex items-center justify-center">
+                        <User className="h-5 w-5 text-primary" />
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                           {traveller.givenName} {traveller.surname}
                         </h3>
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border border-[hsl(var(--primary))]/40">
                             {traveller.ptc}
                           </Badge>
                           <span>•</span>
@@ -219,23 +220,23 @@ export function TravellersList({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
                       <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                        <Calendar className="h-4 w-4" />
+                        <Calendar className="h-4 w-4 text-primary/80" />
                         <span>Born: {traveller.birthdate}</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                        <Phone className="h-4 w-4" />
+                        <Phone className="h-4 w-4 text-primary/80" />
                         <span>+{traveller.countryDialingCode} {traveller.phoneNumber}</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                        <Mail className="h-4 w-4" />
+                        <Mail className="h-4 w-4 text-primary/80" />
                         <span>{traveller.emailAddress}</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                        <FileText className="h-4 w-4" />
+                        <FileText className="h-4 w-4 text-primary/80" />
                         <span>{traveller.documentType}: {traveller.documentId}</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                        <MapPin className="h-4 w-4" />
+                        <MapPin className="h-4 w-4 text-primary/80" />
                         <span>Expires: {traveller.documentExpiryDate}</span>
                       </div>
                       {traveller.loyaltyAirlineCode && (
@@ -272,7 +273,7 @@ export function TravellersList({
                       variant="outline"
                       size="sm"
                       onClick={() => onEditTraveller(traveller.id)}
-                      className="flex items-center gap-1"
+                      className="flex items-center gap-1 border border-[hsl(var(--primary))]/60 text-primary hover:bg-primary/10"
                     >
                       <Edit className="h-4 w-4" />
                       <span className="hidden sm:inline">Edit</span>
@@ -282,7 +283,7 @@ export function TravellersList({
                         variant="outline"
                         size="sm"
                         onClick={() => onDeleteTraveller(traveller.id)}
-                        className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        className="flex items-center gap-1 border border-[hsl(var(--primary))]/60 text-primary hover:bg-primary/10"
                       >
                         <Trash2 className="h-4 w-4" />
                         <span className="hidden sm:inline">Delete</span>

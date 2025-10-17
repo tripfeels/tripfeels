@@ -306,7 +306,7 @@ export default function SuperAdminUserManagement() {
         type="button"
         onClick={() => !disabled && onChange(!checked)}
         disabled={disabled}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
           checked 
             ? 'bg-gradient-to-r from-green-500/80 to-emerald-500/80 backdrop-blur-sm border border-green-400/30' 
             : 'bg-gradient-to-r from-gray-400/60 to-gray-500/60 backdrop-blur-sm border border-gray-400/30'
@@ -420,12 +420,12 @@ export default function SuperAdminUserManagement() {
             type="button"
             onClick={() => !disabled && toggleDropdown(id)}
             disabled={disabled}
-            className="w-full h-10 rounded-xl border border-white/30 bg-white/20 backdrop-blur-sm px-3 text-sm font-medium text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 appearance-none bg-gradient-to-r from-white/20 to-white/10 flex items-center justify-between disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-10 rounded-xl border border-[hsl(var(--primary))]/60 bg-primary/10 text-primary backdrop-blur-sm px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 appearance-none flex items-center justify-between disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/15"
           >
             <span className="truncate">
               {value || placeholder}
             </span>
-            <ChevronDown className={`h-4 w-4 text-gray-600 dark:text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`h-4 w-4 text-primary transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
           </button>
         </div>
 
@@ -457,7 +457,7 @@ export default function SuperAdminUserManagement() {
               <button
                 onClick={loadUsers}
                 disabled={isLoading}
-                className="p-2 rounded-lg bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/30 transition-colors duration-200 disabled:opacity-50"
+                className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors duration-200 disabled:opacity-50"
                 title="Refresh users data"
               >
                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -466,17 +466,17 @@ export default function SuperAdminUserManagement() {
             <p className="text-sm text-gray-600 dark:text-gray-400">View all users, their roles and categories. Update as needed.</p>
           </div>
 
-           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 relative z-10">
-             <input
-               id="user-search"
-               name="user-search"
-               type="text"
-               placeholder="Search by name, email, or category"
-               className="h-9 w-full sm:w-64 rounded-lg border border-white/30 bg-white/20 backdrop-blur-sm px-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
-               value={search}
-               onChange={(e) => setSearch(e.target.value)}
-               aria-label="Search users by name, email, or category"
-             />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 relative z-10">
+              <input
+                id="user-search"
+                name="user-search"
+                type="text"
+                placeholder="Search by name, email, or category"
+                className="h-9 w-full sm:w-64 rounded-lg border border-white/30 bg-white/20 backdrop-blur-sm px-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                aria-label="Search users by name, email, or category"
+              />
              <div className="w-full sm:w-32">
                <CustomDropdown
                  id="role-filter"
@@ -505,7 +505,7 @@ export default function SuperAdminUserManagement() {
           {/* Desktop Table View */}
           <div className="hidden md:block overflow-x-auto rounded-xl border border-white/30 bg-white/20 backdrop-blur-md shadow-lg overflow-visible">
           <table className="min-w-full text-sm">
-            <thead className="bg-white/20 backdrop-blur-sm">
+            <thead className="bg-[hsla(var(--primary)/0.10)] backdrop-blur-sm ring-1 ring-[hsl(var(--primary))/60]">
               <tr>
                   <th className="text-left px-4 py-3 font-medium text-gray-900 dark:text-gray-100 w-8"></th>
                 <th className="text-left px-4 py-3 font-medium text-gray-900 dark:text-gray-100">Name</th>
@@ -540,9 +540,9 @@ export default function SuperAdminUserManagement() {
                             className="p-1 hover:bg-white/20 rounded transition-colors"
                           >
                             {isExpanded ? (
-                              <ChevronDown className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                              <ChevronDown className="h-4 w-4 text-primary" />
                             ) : (
-                              <ChevronRight className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                              <ChevronRight className="h-4 w-4 text-gray-600 dark:text-gray-400 group-hover:text-primary" />
                             )}
                           </button>
                         </td>
@@ -606,7 +606,7 @@ export default function SuperAdminUserManagement() {
                                 {!isEditing && !disableAdminActions && (
                                   <button
                                     onClick={() => startEditing(user)}
-                                    className="px-3 py-1 text-sm bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors"
+                                    className="px-3 py-1 text-sm bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
                                   >
                                     Edit Details
                                   </button>
