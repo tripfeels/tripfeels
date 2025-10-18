@@ -8,6 +8,10 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
   return rateLimiters.admin(request as any, async () => {
+    if (!adminDb) {
+      return NextResponse.json({ error: 'Firebase Admin not configured' }, { status: 503 })
+    }
+
     const session = await getServerSession(authOptions)
     if (!session || session.user?.role !== 'SuperAdmin') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -17,7 +21,7 @@ export async function POST(request: Request) {
     if (!src || typeof src !== 'string') {
       return NextResponse.json({ error: 'src required' }, { status: 400 })
     }
-    const doc = await adminDb.collection('auth_slides').add({ src, alt: alt ?? '', createdAt: new Date() })
+    const doc = await adminDb!.collection('auth_slides').add({ src, alt: alt ?? '', createdAt: new Date() })
     return NextResponse.json({ id: doc.id })
   })
 }

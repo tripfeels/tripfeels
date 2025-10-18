@@ -5,12 +5,19 @@ import { withCache, cacheKeys, cacheTTL } from '@/lib/cache'
 
 export async function GET(request: NextRequest) {
   try {
+    if (!adminDb) {
+      return NextResponse.json(
+        { error: 'Firebase Admin not configured' },
+        { status: 503 }
+      )
+    }
+
     // Use cache for dashboard stats
     const stats = await withCache(
       cacheKeys.dashboardStats(),
       async () => {
         // Get all users from the database (limit to 1000 for performance)
-        const usersSnapshot = await adminDb.collection('users').limit(1000).get()
+        const usersSnapshot = await adminDb!.collection('users').limit(1000).get()
         const users = usersSnapshot.docs.map(doc => doc.data())
 
         // Calculate statistics

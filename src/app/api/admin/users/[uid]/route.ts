@@ -11,10 +11,10 @@ export async function PATCH(
 ) {
   try {
     // Check Firebase Admin configuration
-    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
-      console.error('Firebase Admin environment variables are missing')
-      return NextResponse.json({ 
-        error: 'Server configuration error: Firebase Admin credentials not configured' 
+    if (!adminDb) {
+      console.error('Firebase Admin not initialized')
+      return NextResponse.json({
+        error: 'Server configuration error: Firebase Admin not configured'
       }, { status: 500 })
     }
 
@@ -62,7 +62,7 @@ export async function PATCH(
       })
     }
 
-    await adminDb.collection('users').doc(uid).update(updates)
+    await adminDb!.collection('users').doc(uid).update(updates)
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error('Error updating user:', err)
@@ -79,10 +79,10 @@ export async function DELETE(
 ) {
   try {
     // Check Firebase Admin configuration
-    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
-      console.error('Firebase Admin environment variables are missing')
-      return NextResponse.json({ 
-        error: 'Server configuration error: Firebase Admin credentials not configured' 
+    if (!adminDb) {
+      console.error('Firebase Admin not initialized')
+      return NextResponse.json({
+        error: 'Server configuration error: Firebase Admin not configured'
       }, { status: 500 })
     }
 
@@ -114,7 +114,7 @@ export async function DELETE(
     }
 
     // Delete the user
-    await adminDb.collection('users').doc(uid).delete()
+    await adminDb!.collection('users').doc(uid).delete()
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error('Error deleting user:', err)

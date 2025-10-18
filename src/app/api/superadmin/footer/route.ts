@@ -25,7 +25,7 @@ const DOC = 'global'
 
 export async function GET(request: NextRequest) {
   return rateLimiters.api(request, async () => {
-    const snap = await adminDb.collection(COL).doc(DOC).get()
+    const snap = await adminDb!.collection(COL).doc(DOC).get()
     if (!snap.exists) {
       return NextResponse.json({ settings: null })
     }
@@ -35,6 +35,10 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   return rateLimiters.admin(request, async () => {
+    if (!adminDb) {
+      return NextResponse.json({ error: 'Firebase Admin not configured' }, { status: 503 })
+    }
+
     const session = await getServerSession(authOptions)
     if (!session?.user || session.user.role !== 'SuperAdmin') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -47,7 +51,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const data = parsed.data
-    await adminDb.collection(COL).doc(DOC).set(
+    await adminDb!.collection(COL).doc(DOC).set(
       {
         ...data,
         updatedAt: new Date(),
@@ -56,7 +60,7 @@ export async function PUT(request: NextRequest) {
       { merge: true }
     )
 
-    const snap = await adminDb.collection(COL).doc(DOC).get()
+    const snap = await adminDb!.collection(COL).doc(DOC).get()
     return NextResponse.json({ settings: snap.data() })
   })
 }

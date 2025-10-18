@@ -11,6 +11,10 @@ export async function POST() {
       return NextResponse.json({ error: 'Fix endpoints are only available in development' }, { status: 404 })
     }
 
+    if (!adminDb) {
+      return NextResponse.json({ error: 'Firebase Admin not configured' }, { status: 503 })
+    }
+
     const session = await getServerSession(authOptions)
     
     if (!session || session.user.role !== 'SuperAdmin') {
@@ -19,7 +23,7 @@ export async function POST() {
 
     // Find Ashif Babu's user document
     const ashifEmail = 'asif.java.dev@gmail.com'
-    const usersSnapshot = await adminDb.collection('users').where('email', '==', ashifEmail).get()
+    const usersSnapshot = await adminDb!.collection('users').where('email', '==', ashifEmail).get()
     
     if (usersSnapshot.empty) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
@@ -33,7 +37,7 @@ export async function POST() {
     if (userData.profile?.role && !userData.role) {
       
       // Update the document to move role from profile to root level
-      await adminDb.collection('users').doc(userId).update({
+      await adminDb!.collection('users').doc(userId).update({
         role: userData.profile.role,
         'profile.role': FieldValue.delete()
       })

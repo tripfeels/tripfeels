@@ -38,14 +38,16 @@ export const authOptions: NextAuthOptions = {
           
           const user = userCredential.user
           const userData = await getUser(user.uid)
-          
+
           if (userData) {
             // Update last login timestamp for credentials login
             try {
-              const updateTime = new Date()
-              await adminDb.collection('users').doc(user.uid).update({
-                'metadata.lastLoginAt': updateTime
-              })
+              if (adminDb) {
+                const updateTime = new Date()
+                await adminDb.collection('users').doc(user.uid).update({
+                  'metadata.lastLoginAt': updateTime
+                })
+              }
             } catch (error) {
               console.error('❌ Error updating last login timestamp:', error)
             }
@@ -100,9 +102,15 @@ export const authOptions: NextAuthOptions = {
     // Handle social logins - create user in Firestore if needed and assign role
     if (user && account && (account.provider === 'google' || account.provider === 'facebook')) {
       try {
+        if (!adminDb) {
+          console.warn('AdminDb not initialized, using fallback role assignment')
+          token.role = isSuperAdminEmail(user.email || '') ? 'SuperAdmin' : 'User'
+          return token
+        }
+
         // Check if user exists in Firestore using Admin SDK
         const userDoc = await adminDb.collection('users').doc(user.id).get()
-        
+
         if (userDoc.exists) {
           const userData = userDoc.data()
           // Update last login time for existing user
@@ -115,7 +123,7 @@ export const authOptions: NextAuthOptions = {
           // Create new user in Firestore using Admin SDK
           const role = isSuperAdminEmail(user.email || '') ? 'SuperAdmin' : 'User'
           const now = new Date()
-          
+
           const userData = {
             uid: user.id,
             email: user.email || '',
@@ -138,7 +146,7 @@ export const authOptions: NextAuthOptions = {
             permissions: [],
             assignedBy: ''
           }
-          
+
           await adminDb.collection('users').doc(user.id).set(userData)
           token.role = role
         }

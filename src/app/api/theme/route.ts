@@ -11,6 +11,10 @@ function isValidHex(str: unknown) {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!adminDb) {
+      return NextResponse.json({ error: 'Firebase Admin not configured' }, { status: 503 })
+    }
+
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -35,7 +39,7 @@ export async function POST(req: NextRequest) {
       updatedBy: (session.user as any).id,
     }
 
-    await adminDb.collection('themes').doc('global').set(payload, { merge: true })
+    await adminDb!.collection('themes').doc('global').set(payload, { merge: true })
 
     return NextResponse.json({ ok: true, theme: payload })
   } catch (error: any) {

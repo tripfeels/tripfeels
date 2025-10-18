@@ -11,8 +11,12 @@ export async function POST() {
       return NextResponse.json({ error: 'Sync endpoints are only available in development' }, { status: 404 })
     }
 
+    if (!adminDb || !adminAuth) {
+      return NextResponse.json({ error: 'Firebase Admin not configured' }, { status: 503 })
+    }
+
     const session = await getServerSession(authOptions)
-    
+
     if (!session || session.user.role !== 'SuperAdmin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -31,14 +35,14 @@ export async function POST() {
     for (const authUser of authUsers.users) {
       try {
         // Check if user exists in Firestore
-        const userDoc = await adminDb.collection('users').doc(authUser.uid).get()
+        const userDoc = await adminDb!.collection('users').doc(authUser.uid).get()
         
         if (userDoc.exists) {
           // Update existing user
           const userData = userDoc.data()
           const now = new Date()
           
-          await adminDb.collection('users').doc(authUser.uid).update({
+          await adminDb!.collection('users').doc(authUser.uid).update({
             'metadata.lastLoginAt': now,
             email: authUser.email || '',
             'profile.avatar': authUser.photoURL || userData?.profile?.avatar || ''
@@ -73,7 +77,7 @@ export async function POST() {
             assignedBy: ''
           }
           
-          await adminDb.collection('users').doc(authUser.uid).set(userData)
+          await adminDb!.collection('users').doc(authUser.uid).set(userData)
           results.created++
         }
       } catch (error) {

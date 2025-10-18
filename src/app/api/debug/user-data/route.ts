@@ -10,6 +10,10 @@ export async function GET() {
       return NextResponse.json({ error: 'Debug endpoints are only available in development' }, { status: 404 })
     }
 
+    if (!adminDb) {
+      return NextResponse.json({ error: 'Firebase Admin not configured' }, { status: 503 })
+    }
+
     const session = await getServerSession(authOptions)
     
     if (!session || session.user.role !== 'SuperAdmin') {
@@ -17,7 +21,7 @@ export async function GET() {
     }
 
     // Get all users from Firestore
-    const usersSnapshot = await adminDb.collection('users').get()
+    const usersSnapshot = await adminDb!.collection('users').get()
     const users = []
 
     for (const doc of usersSnapshot.docs) {

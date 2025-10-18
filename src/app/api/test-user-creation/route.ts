@@ -10,6 +10,10 @@ export async function GET() {
       return NextResponse.json({ error: 'Test endpoints are only available in development' }, { status: 404 })
     }
 
+    if (!adminDb) {
+      return NextResponse.json({ error: 'Firebase Admin not configured' }, { status: 503 })
+    }
+
     const session = await getServerSession(authOptions)
     
     if (!session) {
@@ -44,14 +48,14 @@ export async function GET() {
       assignedBy: ''
     }
     
-    await adminDb.collection('users').doc(testUserId).set(testUserData)
+    await adminDb!.collection('users').doc(testUserId).set(testUserData)
     
     // Verify the user was created
-    const createdUser = await adminDb.collection('users').doc(testUserId).get()
+    const createdUser = await adminDb!.collection('users').doc(testUserId).get()
     
     if (createdUser.exists) {
       // Clean up the test user
-      await adminDb.collection('users').doc(testUserId).delete()
+      await adminDb!.collection('users').doc(testUserId).delete()
       
       return NextResponse.json({ 
         success: true,

@@ -20,10 +20,10 @@ export async function GET(request: NextRequest) {
 
     try {
     // Check Firebase Admin configuration
-    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
-      console.error('Firebase Admin environment variables are missing')
-      return NextResponse.json({ 
-        error: 'Server configuration error: Firebase Admin credentials not configured' 
+    if (!adminDb) {
+      console.error('Firebase Admin not initialized')
+      return NextResponse.json({
+        error: 'Server configuration error: Firebase Admin not configured'
       }, { status: 500 })
     }
 
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     const result = await withCache(
       cacheKey,
       async () => {
-        let query: any = adminDb.collection('users')
+        let query: any = adminDb!.collection('users')
         
         // Apply role filter if specified
         if (roleFilter !== 'all') {

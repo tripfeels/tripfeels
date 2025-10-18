@@ -10,8 +10,12 @@ export async function GET() {
       return NextResponse.json({ error: 'Debug endpoints are only available in development' }, { status: 404 })
     }
 
+    if (!adminDb || !adminAuth) {
+      return NextResponse.json({ error: 'Firebase Admin not configured' }, { status: 503 })
+    }
+
     const session = await getServerSession(authOptions)
-    
+
     if (!session) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
@@ -22,7 +26,7 @@ export async function GET() {
       uid: doc.id,
       ...doc.data()
     }))
-    
+
     // Also check Firebase Auth users
     const authUsers = await adminAuth.listUsers()
     
